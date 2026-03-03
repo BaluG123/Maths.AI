@@ -11,6 +11,7 @@ export interface NotificationPayload {
 
 class NotificationService {
     private isInitialized = false;
+    private setModalVisible: ((visible: boolean) => void) | null = null;
 
     /**
      * handler for background messages (needed by index.js)
@@ -20,11 +21,47 @@ class NotificationService {
     }
 
     /**
+     * Connect the UI modal to the service
+     */
+    bindModalControl(callback: (visible: boolean) => void) {
+        this.setModalVisible = callback;
+    }
+
+    /**
      * Start Firebase Messaging listeners & request permissions
      */
     async initialize() {
         if (this.isInitialized) return;
 
+        try {
+            // Check if we already have permission
+            const authStatus = await messaging().hasPermission();
+            const alreadyEnabled =
+                authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+                authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+            if (alreadyEnabled) {
+                this.setupListeners();
+                return;
+            }
+
+            // If not, trigger our custom premium prompt first
+            if (this.setModalVisible) {
+                console.log('[NotificationService] Requesting custom UI prompt...');
+                this.setModalVisible(true);
+            } else {
+                // Fallback to direct request if modal isn't bound (e.g. background init)
+                this.requestNativePermissions();
+            }
+        } catch (error) {
+            console.error('[NotificationService] Initialization failed:', error);
+        }
+    }
+
+    /**
+     * The actual native permission request (called after user clicks 'OK' on our modal)
+     */
+    async requestNativePermissions() {
         try {
             // Android 13+ requires explicit POST_NOTIFICATIONS permission
             if (Platform.OS === 'android' && Platform.Version >= 33) {
@@ -41,7 +78,6 @@ class NotificationService {
 
                 if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
                     console.log('[NotificationService] Notification permission denied on Android');
-                    return;
                 }
             }
 
@@ -51,30 +87,40 @@ class NotificationService {
                 authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
             if (enabled) {
-                console.log('[NotificationService] Authorization status:', authStatus);
-
-                // Get FCM token for manual engagement
-                const token = await messaging().getToken();
-                console.log('[NotificationService] FCM Token:', token);
-
-                // Foreground message handler
-                messaging().onMessage(async remoteMessage => {
-                    console.log('[NotificationService] A new FCM message arrived!', JSON.stringify(remoteMessage));
-                    this.showLocalNotification({
-                        title: remoteMessage.notification?.title || 'MathIQ',
-                        body: remoteMessage.notification?.body || '',
-                    });
-                });
-
-                // Background/Quit handler is usually handled via index.js or App.tsx but setup listener here for active sessions
-                messaging().onNotificationOpenedApp(remoteMessage => {
-                    console.log('[NotificationService] Notification caused app to open from background:', remoteMessage.notification);
-                });
-
-                this.isInitialized = true;
+                this.setupListeners();
             }
         } catch (error) {
-            console.error('[NotificationService] Initialization failed:', error);
+            console.error('[NotificationService] Native request failed:', error);
+        }
+    }
+
+    private async setupListeners() {
+        if (this.isInitialized) return;
+
+        try {
+            console.log('[NotificationService] Setting up listeners...');
+
+            // Get FCM token for manual engagement
+            const token = await messaging().getToken();
+            console.log('[NotificationService] FCM Token:', token);
+
+            // Foreground message handler
+            messaging().onMessage(async remoteMessage => {
+                console.log('[NotificationService] A new FCM message arrived!', JSON.stringify(remoteMessage));
+                this.showLocalNotification({
+                    title: remoteMessage.notification?.title || 'MathIQ',
+                    body: remoteMessage.notification?.body || '',
+                });
+            });
+
+            // Background/Quit handler
+            messaging().onNotificationOpenedApp(remoteMessage => {
+                console.log('[NotificationService] Notification caused app to open from background:', remoteMessage.notification);
+            });
+
+            this.isInitialized = true;
+        } catch (e) {
+            console.error('[NotificationService] Listener setup error:', e);
         }
     }
 
