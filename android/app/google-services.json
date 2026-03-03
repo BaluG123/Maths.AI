@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "645495318161",
+    "project_id": "devuniverse-e24b5",
+    "storage_bucket": "devuniverse-e24b5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:645495318161:android:79121c7fa87f9c6bac4130",
+        "android_client_info": {
+          "package_name": "com.devuniverse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkJWCdbUMQ0Vv8AJS7C5Vm6OFCSE-GybI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

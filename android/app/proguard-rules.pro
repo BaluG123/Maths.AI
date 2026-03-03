@@ -7,4 +7,17 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# Add any project specific keep options here:
+# React Native
+-keep class com.facebook.react.** { *; }
+
+# Firebase
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
+
+# Google Sign-In
+-keep class com.google.android.gms.auth.** { *; }
+
+# Reanimated
+-keep class com.swmansion.reanimated.** { *; }
