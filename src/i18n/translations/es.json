@@ -31,7 +31,9 @@
             "daily_body": "Hola {name}, ¿listo para poner a prueba tu coeficiente intelectual hoy?",
             "test_title": "Notificación de prueba",
             "test_body": "¡Esta es una notificación de prueba para MathIQ!",
-            "test_button": "Enviar notificación de prueba"
+            "test_button": "Enviar notificación de prueba",
+            "permission_title": "Permiso de notificación",
+            "permission_message": "MathIQ necesita permiso para enviarte desafíos diarios y actualizaciones."
         }
     },
     "settings": {

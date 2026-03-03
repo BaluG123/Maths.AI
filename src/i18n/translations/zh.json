@@ -31,7 +31,9 @@
             "daily_body": "嘿 {name}，今天准备好测试你的智商了吗？",
             "test_title": "测试通知",
             "test_body": "这是 MathIQ 的测试通知！",
-            "test_button": "发送测试通知"
+            "test_button": "发送测试通知",
+            "permission_title": "通知权限",
+            "permission_message": "MathIQ 需要权限向您发送每日挑战和更新。"
         }
     },
     "settings": {

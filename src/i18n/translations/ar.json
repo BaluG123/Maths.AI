@@ -31,7 +31,9 @@
             "daily_body": "مرحبًا {name}، هل أنت مستعد لاختبار معدل ذكائك اليوم؟",
             "test_title": "إشعار اختبار",
             "test_body": "هذا إشعار اختبار لـ MathIQ!",
-            "test_button": "إرسال إشعار اختبار"
+            "test_button": "إرسال إشعار اختبار",
+            "permission_title": "إذن الإشعارات",
+            "permission_message": "يحتاج MathIQ إلى إذن لإرسال تحديات وتحديثات يومية لك."
         }
     },
     "settings": {

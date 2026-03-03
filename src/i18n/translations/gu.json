@@ -31,7 +31,9 @@
             "daily_body": "હે {name}, આજે તમારો IQ ટેસ્ટ કરવા માટે તૈયાર છો?",
             "test_title": "પરીક્ષણ સૂચના",
             "test_body": "આ MathIQ માટે પરીક્ષણ સૂચના છે!",
-            "test_button": "પરીક્ષણ સૂચના મોકલો"
+            "test_button": "પરીક્ષણ સૂચના મોકલો",
+            "permission_title": "સૂચના પરવાનગી",
+            "permission_message": "તમને દૈનિક પડકારો અને અપડેટ્સ મોકલવા માટે MathIQ ને પરવાનગીની જરૂર છે."
         }
     },
     "settings": {

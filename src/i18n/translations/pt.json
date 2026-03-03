@@ -31,7 +31,9 @@
             "daily_body": "Ei {name}, pronto para testar seu QI hoje?",
             "test_title": "Notificação de teste",
             "test_body": "Esta é uma notificação de teste para o MathIQ!",
-            "test_button": "Enviar notificação de teste"
+            "test_button": "Enviar notificação de teste",
+            "permission_title": "Permissão de Notificação",
+            "permission_message": "O MathIQ precisa de permissão para enviar desafios e atualizações diárias."
         }
     },
     "settings": {

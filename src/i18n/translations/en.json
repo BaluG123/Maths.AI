@@ -31,7 +31,9 @@
             "daily_body": "Hey {name}, ready to test your IQ today?",
             "test_title": "Test Notification",
             "test_body": "This is a test notification for MathIQ!",
-            "test_button": "Send Test Notification"
+            "test_button": "Send Test Notification",
+            "permission_title": "Notification Permission",
+            "permission_message": "MathIQ needs permission to send you daily challenges and updates."
         }
     },
     "settings": {

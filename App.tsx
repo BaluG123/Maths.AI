@@ -11,10 +11,14 @@ import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { SoundProvider } from './src/context/SoundContext';
 import { AuthProvider } from './src/context/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
-import './src/i18n';
+import NotificationService from './src/services/NotificationService';
 
 function AppContent() {
   const { colors, isDark } = useTheme();
+
+  React.useEffect(() => {
+    NotificationService.initialize();
+  }, []);
 
   return (
     <NavigationContainer>

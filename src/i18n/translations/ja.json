@@ -31,7 +31,9 @@
             "daily_body": "やあ {name}さん、今日IQをテストする準備はできていますか？",
             "test_title": "テスト通知",
             "test_body": "これはMathIQのテスト通知です！",
-            "test_button": "テスト通知を送信"
+            "test_button": "テスト通知を送信",
+            "permission_title": "通知の許可",
+            "permission_message": "MathIQは毎日のチャレンジとアップデートを送信するための許可が必要です。"
         }
     },
     "settings": {

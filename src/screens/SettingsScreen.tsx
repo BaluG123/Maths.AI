@@ -271,18 +271,6 @@ export default function SettingsScreen({ navigation }: any) {
                     <SettingRow icon="info-outline" label={t('settings.version')} rightText={APP_VERSION} iconColor={colors.textSecondary} />
                     <SettingRow icon="functions" label={t('settings.app')} rightText={APP_NAME} iconColor={colors.primary} />
 
-                    {/* Test Notification Row */}
-                    <TouchableOpacity onPress={() => NotificationService.sendTestNotification()}>
-                        <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
-                            <View style={[styles.settingIcon, { backgroundColor: `${colors.secondary}15` }]}>
-                                <Icon name="notification-important" size={22} color={colors.secondary} />
-                            </View>
-                            <Text style={[styles.settingLabel, { color: colors.text }]}>
-                                {t('common.notifications.test_button')}
-                            </Text>
-                            <Icon name="chevron-right" size={24} color={colors.textMuted} />
-                        </View>
-                    </TouchableOpacity>
                 </View>
 
                 {/* Sign Out */}
