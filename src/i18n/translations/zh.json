@@ -1,0 +1,45 @@
+{
+    "common": {
+        "start": "开始挑战",
+        "settings": "设置",
+        "score": "得分",
+        "rank": "排名",
+        "loading": "AI 正在生成...",
+        "solved": "已解决",
+        "points": "分数",
+        "back": "返回",
+        "cancel": "取消",
+        "save": "保存",
+        "logout": "退出",
+        "signin": "使用 Google 登录",
+        "signin_failed": "登录失败",
+        "try_again": "请重试",
+        "maybe_later": "以后再说",
+        "unlock": "解锁无限题目",
+        "unlock_desc": "您已完成免费试用！使用 Google 登录以继续您的数学之旅并在排行榜上竞争。",
+        "tagline": "挑战你的头脑。提升你的思维。"
+    },
+    "settings": {
+        "preferences": "偏好设置",
+        "about": "关于",
+        "dark_mode": "深色模式",
+        "sound": "音效",
+        "notifications": "通知",
+        "language": "语言",
+        "version": "版本",
+        "app": "应用",
+        "guest": "访客玩家",
+        "signout_confirm": "确定要退出登录吗？"
+    },
+    "quiz": {
+        "level": "级别",
+        "attempts": "次尝试",
+        "show_hint": "显示提示",
+        "watch_ad": "观看广告查看解答",
+        "solution": "解答",
+        "answer": "答案",
+        "next": "下一题",
+        "congrats": "恭喜！",
+        "completed_all": "您已完成所有可用题目！"
+    }
+}

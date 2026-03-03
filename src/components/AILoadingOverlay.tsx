@@ -1,9 +1,10 @@
 // AI Loading Overlay — "AI is generating your next challenge..."
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     visible: boolean;
@@ -11,14 +12,29 @@ interface Props {
 
 export default function AILoadingOverlay({ visible }: Props) {
     const { colors } = useTheme();
+    const { t } = useTranslation();
     const spinAnim = useRef(new Animated.Value(0)).current;
     const pulseAnim = useRef(new Animated.Value(1)).current;
     const dotAnim1 = useRef(new Animated.Value(0)).current;
     const dotAnim2 = useRef(new Animated.Value(0)).current;
     const dotAnim3 = useRef(new Animated.Value(0)).current;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const [thinkingPhase, setThinkingPhase] = useState(0);
+
+    const thinkingTexts = [
+        t('common.loading'),
+        '🔢 ' + t('common.loading'),
+    ];
 
     useEffect(() => {
         if (visible) {
+            // Fade in smoothly
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+
             // Spin animation
             Animated.loop(
                 Animated.timing(spinAnim, {
@@ -69,16 +85,27 @@ export default function AILoadingOverlay({ visible }: Props) {
             animateDot(dotAnim1, 0);
             animateDot(dotAnim2, 200);
             animateDot(dotAnim3, 400);
+
+            // Thinking phase text switcher — gives AI "thinking" feel
+            const interval = setInterval(() => {
+                setThinkingPhase(prev => (prev + 1) % thinkingTexts.length);
+            }, 1000);
+
+            return () => {
+                clearInterval(interval);
+            };
         }
 
         return () => {
+            fadeAnim.setValue(0);
             spinAnim.setValue(0);
             pulseAnim.setValue(1);
             dotAnim1.setValue(0);
             dotAnim2.setValue(0);
             dotAnim3.setValue(0);
+            setThinkingPhase(0);
         };
-    }, [visible, spinAnim, pulseAnim, dotAnim1, dotAnim2, dotAnim3]);
+    }, [visible]);
 
     if (!visible) return null;
 
@@ -88,7 +115,7 @@ export default function AILoadingOverlay({ visible }: Props) {
     });
 
     return (
-        <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+        <Animated.View style={[styles.overlay, { backgroundColor: colors.overlay, opacity: fadeAnim }]}>
             <View style={[styles.container, { backgroundColor: colors.surface }]}>
                 {/* Glowing ring */}
                 <View style={[styles.glowRing, { borderColor: colors.primary, shadowColor: colors.primary }]}>
@@ -98,11 +125,8 @@ export default function AILoadingOverlay({ visible }: Props) {
                 </View>
 
                 {/* Text with dots */}
-                <Text style={[styles.title, { color: colors.text }]}>AI is thinking</Text>
+                <Text style={[styles.title, { color: colors.text }]}>{thinkingTexts[thinkingPhase]}</Text>
                 <View style={styles.dotsContainer}>
-                    <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                        Generating your next challenge
-                    </Text>
                     <View style={styles.dots}>
                         {[dotAnim1, dotAnim2, dotAnim3].map((anim, i) => (
                             <Animated.Text
@@ -116,7 +140,7 @@ export default function AILoadingOverlay({ visible }: Props) {
                                             {
                                                 translateY: anim.interpolate({
                                                     inputRange: [0, 1],
-                                                    outputRange: [0, -4],
+                                                    outputRange: [0, -6],
                                                 }),
                                             },
                                         ],
@@ -148,7 +172,7 @@ export default function AILoadingOverlay({ visible }: Props) {
                     ))}
                 </View>
             </View>
-        </View>
+        </Animated.View>
     );
 }
 
@@ -192,18 +216,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    subtitle: {
-        fontSize: 14,
-        fontWeight: '400',
-    },
     dots: {
         flexDirection: 'row',
         marginLeft: 4,
     },
     dot: {
-        fontSize: 18,
+        fontSize: 22,
         fontWeight: 'bold',
-        marginHorizontal: 1,
+        marginHorizontal: 2,
     },
     particlesRow: {
         flexDirection: 'row',

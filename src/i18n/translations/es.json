@@ -1,0 +1,45 @@
+{
+    "common": {
+        "start": "Comenzar Desafío",
+        "settings": "Ajustes",
+        "score": "Puntuación",
+        "rank": "Rango",
+        "loading": "IA generando...",
+        "solved": "Resuelto",
+        "points": "Puntos",
+        "back": "Volver",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "logout": "Cerrar Sesión",
+        "signin": "Iniciar sesión con Google",
+        "signin_failed": "Error al iniciar sesión",
+        "try_again": "Por favor, inténtelo de nuevo",
+        "maybe_later": "Quizás más tarde",
+        "unlock": "Desbloquear Preguntas Ilimitadas",
+        "unlock_desc": "¡Has completado la prueba gratuita! Inicia sesión con Google para continuar tu viaje matemático y competir en la tabla de clasificación.",
+        "tagline": "Desafía tu mente. Eleva tu pensamiento."
+    },
+    "settings": {
+        "preferences": "PREFERENCIAS",
+        "about": "ACERCA DE",
+        "dark_mode": "Modo Oscuro",
+        "sound": "Efectos de Sonido",
+        "notifications": "Notificaciones",
+        "language": "Idioma",
+        "version": "Versión",
+        "app": "App",
+        "guest": "Jugador Invitado",
+        "signout_confirm": "¿Estás seguro de que quieres cerrar sesión?"
+    },
+    "quiz": {
+        "level": "Nivel",
+        "attempts": "intentos",
+        "show_hint": "Mostrar Pista",
+        "watch_ad": "Ver Anuncio para Ver la Solución",
+        "solution": "Solución",
+        "answer": "Respuesta",
+        "next": "Siguiente Pregunta",
+        "congrats": "¡Felicidades!",
+        "completed_all": "¡Has completado todas las preguntas disponibles!"
+    }
+}

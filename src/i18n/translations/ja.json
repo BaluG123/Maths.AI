@@ -1,0 +1,45 @@
+{
+    "common": {
+        "start": "チャレンジ開始",
+        "settings": "設定",
+        "score": "スコア",
+        "rank": "ランク",
+        "loading": "AIが生成中...",
+        "solved": "解決済み",
+        "points": "ポイント",
+        "back": "戻る",
+        "cancel": "キャンセル",
+        "save": "保存",
+        "logout": "サインアウト",
+        "signin": "Googleでサインイン",
+        "signin_failed": "サインイン失敗",
+        "try_again": "もう一度お試しください",
+        "maybe_later": "後で",
+        "unlock": "無制限の問題をアンロック",
+        "unlock_desc": "無料トライアルが終了しました！数学の旅を続けてリーダーボードで競うために、Googleでサインインしてください。",
+        "tagline": "あなたの心に挑戦を。思考を高めよう。"
+    },
+    "settings": {
+        "preferences": "環境設定",
+        "about": "アプリについて",
+        "dark_mode": "ダークモード",
+        "sound": "効果音",
+        "notifications": "通知",
+        "language": "言語",
+        "version": "バージョン",
+        "app": "アプリ",
+        "guest": "ゲストプレイヤー",
+        "signout_confirm": "本当にサインアウトしますか？"
+    },
+    "quiz": {
+        "level": "レベル",
+        "attempts": "回試行",
+        "show_hint": "ヒントを表示",
+        "watch_ad": "広告を見て解答を確認",
+        "solution": "解答",
+        "answer": "答え",
+        "next": "次の問題",
+        "congrats": "おめでとう！",
+        "completed_all": "すべての問題を完了しました！"
+    }
+}

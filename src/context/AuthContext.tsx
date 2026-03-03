@@ -27,8 +27,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         // Configure Google Sign-In
         GoogleSignin.configure({
-            webClientId: '', // TODO: User must set this from Firebase Console
+            webClientId: '645495318161-1jmgfggpo4sqr18e7fbvcq8egfa8q5dc.apps.googleusercontent.com',
         });
+
+        // Check for existing Google session
+        const checkUser = async () => {
+            try {
+                const currentUser = await GoogleSignin.getCurrentUser();
+                if (!currentUser) {
+                    await GoogleSignin.signInSilently();
+                }
+            } catch (e) {
+                // Not signed in silently
+            }
+        };
+        checkUser();
 
         // Listen for auth state changes
         const unsubscribe = auth().onAuthStateChanged(firebaseUser => {
@@ -65,8 +78,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signOut = async () => {
         try {
-            await GoogleSignin.signOut();
             await auth().signOut();
+            // GoogleSignin.signOut() can fail if not signed in or not initialized correctly
+            const currentUser = await GoogleSignin.getCurrentUser();
+            if (currentUser) {
+                await GoogleSignin.signOut();
+            }
         } catch (error) {
             console.error('Sign-Out Error:', error);
         }

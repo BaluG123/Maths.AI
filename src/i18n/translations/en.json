@@ -1,0 +1,45 @@
+{
+    "common": {
+        "start": "Start Challenge",
+        "settings": "Settings",
+        "score": "Score",
+        "rank": "Rank",
+        "loading": "AI is generating...",
+        "solved": "Solved",
+        "points": "Points",
+        "back": "Back",
+        "cancel": "Cancel",
+        "save": "Save",
+        "logout": "Sign Out",
+        "signin": "Sign in with Google",
+        "signin_failed": "Sign In Failed",
+        "try_again": "Please try again",
+        "maybe_later": "Maybe later",
+        "unlock": "Unlock Unlimited Questions",
+        "unlock_desc": "You've completed the free trial! Sign in with Google to continue your math journey and compete on the leaderboard.",
+        "tagline": "Challenge your mind. Elevate your thinking."
+    },
+    "settings": {
+        "preferences": "PREFERENCES",
+        "about": "ABOUT",
+        "dark_mode": "Dark Mode",
+        "sound": "Sound Effects",
+        "notifications": "Notifications",
+        "language": "Language",
+        "version": "Version",
+        "app": "App",
+        "guest": "Guest Player",
+        "signout_confirm": "Are you sure you want to sign out?"
+    },
+    "quiz": {
+        "level": "Level",
+        "attempts": "attempts",
+        "show_hint": "Show Hint",
+        "watch_ad": "Watch Ad to See Solution",
+        "solution": "Solution",
+        "answer": "Answer",
+        "next": "Next Question",
+        "congrats": "Congratulations!",
+        "completed_all": "You have completed all available questions!"
+    }
+}

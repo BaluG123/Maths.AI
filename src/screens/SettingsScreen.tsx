@@ -10,14 +10,16 @@ import {
     ScrollView,
     Switch,
     Alert,
+    Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import GradientBackground from '../components/GradientBackground';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useSound } from '../context/SoundContext';
-import { getUserScore } from '../utils/storageHelper';
-import { getCompletedQuestions } from '../utils/storageHelper';
+import { useTranslation } from 'react-i18next';
+import { changeLanguage } from '../i18n';
+import { getUserScore, getCompletedQuestions } from '../utils/storageHelper';
 import {
     getNotificationsEnabled,
     setNotificationsEnabled,
@@ -27,6 +29,7 @@ import { getUserRank } from '../services/firebaseService';
 import { APP_NAME, APP_VERSION } from '../utils/constants';
 
 export default function SettingsScreen({ navigation }: any) {
+    const { t, i18n } = useTranslation();
     const { colors, isDark, toggleTheme } = useTheme();
     const { user, isSignedIn, signInWithGoogle, signOut } = useAuth();
     const { soundEnabled, toggleSound } = useSound();
@@ -34,10 +37,30 @@ export default function SettingsScreen({ navigation }: any) {
     const [score, setScore] = useState(0);
     const [completedCount, setCompletedCount] = useState(0);
     const [globalRank, setGlobalRank] = useState(0);
+    const [showLanguageModal, setShowLanguageModal] = useState(false);
+
+    const languages = [
+        { code: 'en', name: 'English', flag: '🇺🇸' },
+        { code: 'hi', name: 'हिन्दी (Hindi)', flag: '🇮🇳' },
+        { code: 'mr', name: 'मराठी (Marathi)', flag: '🇮🇳' },
+        { code: 'te', name: 'తెలుగు (Telugu)', flag: '🇮🇳' },
+        { code: 'kn', name: 'ಕನ್ನಡ (Kannada)', flag: '🇮🇳' },
+        { code: 'ta', name: 'தமிழ் (Tamil)', flag: '🇮🇳' },
+        { code: 'bn', name: 'বাংলা (Bengali)', flag: '🇮🇳' },
+        { code: 'gu', name: 'ગુજરાતી (Gujarati)', flag: '🇮🇳' },
+        { code: 'pa', name: 'ਪੰਜਾਬੀ (Punjabi)', flag: '🇮🇳' },
+        { code: 'ml', name: 'മലയാളം (Malayalam)', flag: '🇮🇳' },
+        { code: 'es', name: 'Español (Spanish)', flag: '🇪🇸' },
+        { code: 'fr', name: 'Français (French)', flag: '🇫🇷' },
+        { code: 'ar', name: 'العربية (Arabic)', flag: '🇸🇦' },
+        { code: 'pt', name: 'Português (Portuguese)', flag: '🇧🇷' },
+        { code: 'zh', name: '中文 (Chinese)', flag: '🇨🇳' },
+        { code: 'ja', name: '日本語 (Japanese)', flag: '🇯🇵' },
+    ];
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [isSignedIn, user]);
 
     const loadData = async () => {
         const s = await getUserScore();
@@ -48,8 +71,15 @@ export default function SettingsScreen({ navigation }: any) {
         setNotificationsEnabledState(notifEnabled);
 
         if (isSignedIn && user) {
-            const rankData = await getUserRank(user.uid);
-            setGlobalRank(rankData.rank);
+            try {
+                const rankData = await getUserRank(user.uid);
+                setGlobalRank(rankData.rank);
+            } catch (error) {
+                console.error('Failed to load global rank:', error);
+                setGlobalRank(0);
+            }
+        } else {
+            setGlobalRank(0);
         }
     };
 
@@ -59,10 +89,10 @@ export default function SettingsScreen({ navigation }: any) {
     };
 
     const handleSignOut = () => {
-        Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-            { text: 'Cancel', style: 'cancel' },
+        Alert.alert(t('common.logout'), t('settings.signout_confirm'), [
+            { text: t('common.cancel'), style: 'cancel' },
             {
-                text: 'Sign Out',
+                text: t('common.logout'),
                 style: 'destructive',
                 onPress: async () => {
                     await signOut();
@@ -109,7 +139,7 @@ export default function SettingsScreen({ navigation }: any) {
                     <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                         <Icon name="arrow-back-ios" size={20} color={colors.text} />
                     </TouchableOpacity>
-                    <Text style={[styles.headerTitle, { color: colors.text }]}>Settings</Text>
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>{t('common.settings')}</Text>
                     <View style={{ width: 36 }} />
                 </View>
 
@@ -137,7 +167,7 @@ export default function SettingsScreen({ navigation }: any) {
                                 onPress={signInWithGoogle}
                                 style={[styles.signInBtn, { backgroundColor: colors.primary }]}>
                                 <Icon name="login" size={18} color="#FFFFFF" />
-                                <Text style={styles.signInBtnText}>Sign in with Google</Text>
+                                <Text style={styles.signInBtnText}>{t('common.signin')}</Text>
                             </TouchableOpacity>
                         </>
                     )}
@@ -150,7 +180,7 @@ export default function SettingsScreen({ navigation }: any) {
                     </View>
                     <View style={styles.rankInfo}>
                         <Text style={[styles.rankTitle, { color: rankInfo.color }]}>{rankInfo.title}</Text>
-                        <Text style={[styles.rankScore, { color: colors.textSecondary }]}>Score: {score}</Text>
+                        <Text style={[styles.rankScore, { color: colors.textSecondary }]}>{t('common.score')}: {score}</Text>
                         {globalRank > 0 && (
                             <Text style={[styles.globalRank, { color: colors.secondary }]}>
                                 🌍 Global Rank #{globalRank}
@@ -183,26 +213,26 @@ export default function SettingsScreen({ navigation }: any) {
                     <View style={[styles.statItem, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
                         <Icon name="check-circle" size={24} color={colors.correct} />
                         <Text style={[styles.statNumber, { color: colors.text }]}>{completedCount}</Text>
-                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>Solved</Text>
+                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.solved')}</Text>
                     </View>
                     <View style={[styles.statItem, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
                         <Icon name="star" size={24} color={colors.secondary} />
                         <Text style={[styles.statNumber, { color: colors.text }]}>{score}</Text>
-                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>Points</Text>
+                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.points')}</Text>
                     </View>
                     <View style={[styles.statItem, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
                         <Icon name="emoji-events" size={24} color={rankInfo.color} />
                         <Text style={[styles.statNumber, { color: colors.text }]}>#{globalRank || '—'}</Text>
-                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>Rank</Text>
+                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.rank')}</Text>
                     </View>
                 </View>
 
                 {/* Settings Section */}
                 <View style={[styles.settingsSection, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
-                    <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>PREFERENCES</Text>
+                    <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settings.preferences')}</Text>
                     <SettingRow
                         icon={isDark ? 'dark-mode' : 'light-mode'}
-                        label="Dark Mode"
+                        label={t('settings.dark_mode')}
                         value={isDark}
                         onToggle={toggleTheme}
                         isSwitch
@@ -210,7 +240,7 @@ export default function SettingsScreen({ navigation }: any) {
                     />
                     <SettingRow
                         icon={soundEnabled ? 'volume-up' : 'volume-off'}
-                        label="Sound Effects"
+                        label={t('settings.sound')}
                         value={soundEnabled}
                         onToggle={toggleSound}
                         isSwitch
@@ -218,19 +248,27 @@ export default function SettingsScreen({ navigation }: any) {
                     />
                     <SettingRow
                         icon="notifications"
-                        label="Notifications"
+                        label={t('settings.notifications')}
                         value={notificationsEnabled}
                         onToggle={handleNotificationsToggle}
                         isSwitch
                         iconColor="#FF6B9D"
                     />
+                    <TouchableOpacity onPress={() => setShowLanguageModal(true)}>
+                        <SettingRow
+                            icon="language"
+                            label={t('settings.language')}
+                            rightText={languages.find(l => l.code === i18n.language)?.name || 'English'}
+                            iconColor="#3F51B5"
+                        />
+                    </TouchableOpacity>
                 </View>
 
                 {/* About Section */}
                 <View style={[styles.settingsSection, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
-                    <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>ABOUT</Text>
-                    <SettingRow icon="info-outline" label="Version" rightText={APP_VERSION} iconColor={colors.textSecondary} />
-                    <SettingRow icon="psychology" label="App" rightText={APP_NAME} iconColor={colors.primary} />
+                    <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settings.about')}</Text>
+                    <SettingRow icon="info-outline" label={t('settings.version')} rightText={APP_VERSION} iconColor={colors.textSecondary} />
+                    <SettingRow icon="psychology" label={t('settings.app')} rightText={APP_NAME} iconColor={colors.primary} />
                 </View>
 
                 {/* Sign Out */}
@@ -239,9 +277,50 @@ export default function SettingsScreen({ navigation }: any) {
                         onPress={handleSignOut}
                         style={[styles.signOutBtn, { borderColor: colors.wrong }]}>
                         <Icon name="logout" size={20} color={colors.wrong} />
-                        <Text style={[styles.signOutText, { color: colors.wrong }]}>Sign Out</Text>
+                        <Text style={[styles.signOutText, { color: colors.wrong }]}>{t('common.logout')}</Text>
                     </TouchableOpacity>
                 )}
+
+                {/* Language Modal */}
+                <Modal visible={showLanguageModal} transparent animationType="fade">
+                    <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0,0,0,0.7)' }]}>
+                        <View style={[styles.modalContainer, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
+                            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('settings.language')}</Text>
+                            <ScrollView style={{ width: '100%', maxHeight: 400 }}>
+                                {languages.map((lang) => (
+                                    <TouchableOpacity
+                                        key={lang.code}
+                                        style={[
+                                            styles.langItem,
+                                            {
+                                                backgroundColor: i18n.language === lang.code ? colors.primaryGlow : 'transparent',
+                                                borderColor: colors.border
+                                            }
+                                        ]}
+                                        onPress={async () => {
+                                            await changeLanguage(lang.code);
+                                            setShowLanguageModal(false);
+                                        }}
+                                    >
+                                        <Text style={styles.langFlag}>{lang.flag}</Text>
+                                        <Text style={[styles.langName, { color: i18n.language === lang.code ? colors.primary : colors.text }]}>
+                                            {lang.name}
+                                        </Text>
+                                        {i18n.language === lang.code && (
+                                            <Icon name="check" size={20} color={colors.primary} />
+                                        )}
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                            <TouchableOpacity
+                                onPress={() => setShowLanguageModal(false)}
+                                style={[styles.closeBtn, { backgroundColor: colors.surfaceElevated }]}
+                            >
+                                <Text style={[styles.closeBtnText, { color: colors.textSecondary }]}>{t('common.cancel')}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
 
                 <View style={styles.bottomSpacer} />
             </ScrollView>
@@ -447,5 +526,50 @@ const styles = StyleSheet.create({
     },
     bottomSpacer: {
         height: 20,
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    modalContainer: {
+        width: '100%',
+        maxWidth: 340,
+        borderRadius: 24,
+        padding: 24,
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        marginBottom: 20,
+    },
+    langItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        marginBottom: 8,
+    },
+    langFlag: {
+        fontSize: 20,
+        marginRight: 12,
+    },
+    langName: {
+        flex: 1,
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    closeBtn: {
+        marginTop: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 32,
+        borderRadius: 20,
+    },
+    closeBtnText: {
+        fontSize: 15,
+        fontWeight: '600',
     },
 });

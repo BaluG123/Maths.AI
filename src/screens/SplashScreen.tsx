@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { APP_NAME, APP_TAGLINE, SPLASH_DURATION } from '../utils/constants';
@@ -9,6 +10,7 @@ import { APP_NAME, APP_TAGLINE, SPLASH_DURATION } from '../utils/constants';
 const { width, height } = Dimensions.get('window');
 
 export default function SplashScreen({ navigation }: any) {
+    const { t } = useTranslation();
     const logoScale = useRef(new Animated.Value(0.3)).current;
     const logoOpacity = useRef(new Animated.Value(0)).current;
     const titleOpacity = useRef(new Animated.Value(0)).current;
@@ -203,7 +205,7 @@ export default function SplashScreen({ navigation }: any) {
                     styles.tagline,
                     { opacity: taglineOpacity },
                 ]}>
-                {APP_TAGLINE}
+                {t('common.tagline') || APP_TAGLINE}
             </Animated.Text>
 
             {/* Bottom loading bar */}

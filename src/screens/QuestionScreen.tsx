@@ -1,12 +1,12 @@
 // QuestionScreen — Core quiz flow with all game logic
 // Features: paging, 2-trial system, reward ad, AI loading, sign-in gate, sound effects
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     View,
     Text,
     StyleSheet,
-    FlatList,
+    ScrollView,
     Dimensions,
     TouchableOpacity,
     Alert,
@@ -22,6 +22,7 @@ import OptionButton from '../components/OptionButton';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useSound } from '../context/SoundContext';
+import { useTranslation } from 'react-i18next';
 import {
     FREE_QUESTION_LIMIT,
     MAX_TRIALS_PER_QUESTION,
@@ -45,6 +46,23 @@ import questionsData from '../data/questions.json';
 
 const { width, height } = Dimensions.get('window');
 
+// Lazy-load localized questions & build O(1) lookup map
+let _localizedMap: Map<string, any> | null = null;
+function getLocalizedMap(): Map<string, any> {
+    if (!_localizedMap) {
+        try {
+            const data = require('../data/localized_questions.json');
+            _localizedMap = new Map();
+            for (const item of data) {
+                _localizedMap.set(item.id, item);
+            }
+        } catch {
+            _localizedMap = new Map();
+        }
+    }
+    return _localizedMap;
+}
+
 interface Question {
     id: string;
     category: string;
@@ -60,10 +78,11 @@ interface Question {
 type OptionState = 'default' | 'correct' | 'wrong' | 'selected';
 
 export default function QuestionScreen({ navigation }: any) {
+    const { t, i18n } = useTranslation();
     const { colors } = useTheme();
     const { user, isSignedIn, signInWithGoogle } = useAuth();
     const { playCorrectSound, playWrongSound } = useSound();
-    const flatListRef = useRef<FlatList>(null);
+    const scrollViewRef = useRef<ScrollView>(null);
 
     const [questions, setQuestions] = useState<Question[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -182,8 +201,8 @@ export default function QuestionScreen({ navigation }: any) {
         const nextIndex = currentIndex + 1;
 
         if (nextIndex >= questions.length) {
-            Alert.alert('🎉 Congratulations!', 'You have completed all available questions!', [
-                { text: 'Go Home', onPress: () => navigation.goBack() },
+            Alert.alert(t('quiz.congrats'), t('quiz.completed_all'), [
+                { text: t('common.back'), onPress: () => navigation.goBack() },
             ]);
             return;
         }
@@ -197,12 +216,17 @@ export default function QuestionScreen({ navigation }: any) {
             return;
         }
 
-        // Show AI loading animation
+        // Show AI loading animation — 2 seconds to simulate AI thinking
+        // 1) Show overlay immediately
         setShowAILoading(true);
+
+        // 2) Update question behind the overlay so new content is ready
+        setCurrentIndex(nextIndex);
+        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+
+        // 3) Dismiss overlay after 2s to reveal fresh question
         setTimeout(() => {
             setShowAILoading(false);
-            setCurrentIndex(nextIndex);
-            flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
         }, AI_LOADING_DELAY);
     };
 
@@ -225,11 +249,26 @@ export default function QuestionScreen({ navigation }: any) {
             // Continue to next question
             moveToNextQuestion();
         } catch (error) {
-            Alert.alert('Sign In Failed', 'Please try again');
+            Alert.alert(t('common.signin_failed'), t('common.try_again'));
         }
     };
 
-    const renderQuestion = ({ item, index }: { item: Question; index: number }) => {
+    // Current question to display (single question at a time for vertical scroll)
+    const currentQuestion = questions[currentIndex];
+
+    // Get localized data using O(1) map lookup (memoized)
+    const localizedData = useMemo(() => {
+        if (!currentQuestion) return null;
+        const currentLang = i18n.language;
+        if (currentLang === 'en') return null; // No need to look up English
+        const map = getLocalizedMap();
+        return map.get(currentQuestion.id)?.[currentLang] || null;
+    }, [currentQuestion?.id, i18n.language]);
+
+    const renderCurrentQuestion = () => {
+        const item = currentQuestion;
+        if (!item) return null;
+
         const questionTrials = trials[item.id] || 0;
         const questionAnswered = answered[item.id] || false;
         const questionOptionStates = optionStates[item.id] || ['default', 'default', 'default', 'default'];
@@ -237,8 +276,14 @@ export default function QuestionScreen({ navigation }: any) {
         const solutionVisible = showSolution[item.id] || false;
         const triedMaxAndFailed = questionTrials >= MAX_TRIALS_PER_QUESTION && !questionOptionStates.includes('correct');
 
+        const displayQuestion = localizedData?.question || item.question;
+        const displayOptions = localizedData?.options || item.options;
+        const displayHint = localizedData?.hint || item.hint;
+        const displaySolution = localizedData?.solution || item.solution;
+        const displayExplanation = localizedData?.explanation || item.explanation;
+
         return (
-            <View style={[styles.questionPage, { width }]}>
+            <View style={styles.questionPage}>
                 <View style={styles.questionContent}>
                     {/* Category + Difficulty badges */}
                     <View style={styles.badges}>
@@ -276,12 +321,12 @@ export default function QuestionScreen({ navigation }: any) {
 
                     {/* Question text */}
                     <View style={[styles.questionCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
-                        <Text style={[styles.questionText, { color: colors.text }]}>{item.question}</Text>
+                        <Text style={[styles.questionText, { color: colors.text }]}>{displayQuestion}</Text>
                     </View>
 
                     {/* Options */}
                     <View style={styles.optionsContainer}>
-                        {item.options.map((option, optIdx) => (
+                        {displayOptions.map((option: string, optIdx: number) => (
                             <OptionButton
                                 key={optIdx}
                                 label={option}
@@ -309,7 +354,7 @@ export default function QuestionScreen({ navigation }: any) {
                             ))}
                         </View>
                         <Text style={[styles.trialText, { color: colors.textMuted }]}>
-                            {questionTrials}/{MAX_TRIALS_PER_QUESTION} attempts
+                            {questionTrials}/{MAX_TRIALS_PER_QUESTION} {t('quiz.attempts')}
                         </Text>
                     </View>
 
@@ -319,7 +364,7 @@ export default function QuestionScreen({ navigation }: any) {
                             onPress={() => setShowHint(prev => ({ ...prev, [item.id]: true }))}
                             style={[styles.hintButton, { borderColor: colors.secondary }]}>
                             <Icon name="lightbulb-outline" size={18} color={colors.secondary} />
-                            <Text style={[styles.hintButtonText, { color: colors.secondary }]}>Show Hint</Text>
+                            <Text style={[styles.hintButtonText, { color: colors.secondary }]}>{t('quiz.show_hint')}</Text>
                         </TouchableOpacity>
                     )}
 
@@ -327,7 +372,7 @@ export default function QuestionScreen({ navigation }: any) {
                     {hintVisible && (
                         <View style={[styles.hintCard, { backgroundColor: colors.secondaryGlow, borderColor: colors.secondary }]}>
                             <Icon name="lightbulb" size={20} color={colors.secondary} />
-                            <Text style={[styles.hintText, { color: colors.text }]}>{item.hint}</Text>
+                            <Text style={[styles.hintText, { color: colors.text }]}>{displayHint}</Text>
                         </View>
                     )}
 
@@ -337,7 +382,7 @@ export default function QuestionScreen({ navigation }: any) {
                             onPress={() => handleWatchAd(item.id)}
                             style={[styles.adButton, { backgroundColor: colors.accent }]}>
                             <Icon name="play-circle-outline" size={22} color="#FFFFFF" />
-                            <Text style={styles.adButtonText}>Watch Ad to See Solution</Text>
+                            <Text style={styles.adButtonText}>{t('quiz.watch_ad')}</Text>
                         </TouchableOpacity>
                     )}
 
@@ -346,17 +391,17 @@ export default function QuestionScreen({ navigation }: any) {
                         <View style={[styles.solutionCard, { backgroundColor: colors.correctBg, borderColor: colors.correct }]}>
                             <View style={styles.solutionHeader}>
                                 <Icon name="verified" size={20} color={colors.correct} />
-                                <Text style={[styles.solutionTitle, { color: colors.correct }]}>Solution</Text>
+                                <Text style={[styles.solutionTitle, { color: colors.correct }]}>{t('quiz.solution')}</Text>
                             </View>
-                            <Text style={[styles.solutionText, { color: colors.text }]}>Answer: {item.solution}</Text>
-                            <Text style={[styles.explanationText, { color: colors.textSecondary }]}>{item.explanation}</Text>
+                            <Text style={[styles.solutionText, { color: colors.text }]}>{t('quiz.answer')}: {displaySolution}</Text>
+                            <Text style={[styles.explanationText, { color: colors.textSecondary }]}>{displayExplanation}</Text>
 
                             {/* Next question button (if solution was revealed via ad) */}
                             {triedMaxAndFailed && solutionVisible && (
                                 <TouchableOpacity
                                     onPress={moveToNextQuestion}
                                     style={[styles.nextButton, { backgroundColor: colors.primary }]}>
-                                    <Text style={styles.nextButtonText}>Next Question</Text>
+                                    <Text style={styles.nextButtonText}>{t('quiz.next')}</Text>
                                     <Icon name="arrow-forward" size={18} color="#FFFFFF" />
                                 </TouchableOpacity>
                             )}
@@ -378,7 +423,7 @@ export default function QuestionScreen({ navigation }: any) {
 
                 {/* Level indicator */}
                 <View style={styles.levelContainer}>
-                    <Text style={[styles.levelText, { color: colors.textSecondary }]}>Level</Text>
+                    <Text style={[styles.levelText, { color: colors.textSecondary }]}>{t('quiz.level')}</Text>
                     <Text style={[styles.levelNumber, { color: colors.primary }]}>{levelNumber}</Text>
                 </View>
 
@@ -412,22 +457,16 @@ export default function QuestionScreen({ navigation }: any) {
                 />
             </View>
 
-            {/* Questions FlatList */}
-            <FlatList
-                ref={flatListRef}
-                data={questions}
-                renderItem={renderQuestion}
-                keyExtractor={item => item.id}
-                horizontal
-                pagingEnabled
-                scrollEnabled={false}
-                showsHorizontalScrollIndicator={false}
-                getItemLayout={(_, index) => ({
-                    length: width,
-                    offset: width * index,
-                    index,
-                })}
-            />
+            {/* Question content — vertical scroll */}
+            <ScrollView
+                ref={scrollViewRef}
+                style={styles.scrollContainer}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                bounces={true}
+            >
+                {renderCurrentQuestion()}
+            </ScrollView>
 
             {/* AI Loading */}
             <AILoadingOverlay visible={showAILoading} />
@@ -440,17 +479,17 @@ export default function QuestionScreen({ navigation }: any) {
                             <Icon name="lock-open" size={40} color={colors.primary} />
                         </View>
                         <Text style={[styles.modalTitle, { color: colors.text }]}>
-                            Unlock Unlimited Questions
+                            {t('common.unlock')}
                         </Text>
                         <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
-                            You've completed the free trial! Sign in with Google to continue your math journey and compete on the leaderboard.
+                            {t('common.unlock_desc')}
                         </Text>
                         <TouchableOpacity onPress={handleSignIn} style={styles.googleButton}>
                             <Icon name="login" size={22} color="#FFFFFF" />
-                            <Text style={styles.googleButtonText}>Sign in with Google</Text>
+                            <Text style={styles.googleButtonText}>{t('common.signin')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => { setShowSignInModal(false); navigation.goBack(); }}>
-                            <Text style={[styles.laterText, { color: colors.textMuted }]}>Maybe later</Text>
+                            <Text style={[styles.laterText, { color: colors.textMuted }]}>{t('common.maybe_later')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -513,12 +552,16 @@ const styles = StyleSheet.create({
         height: '100%',
         borderRadius: 2,
     },
+    scrollContainer: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingBottom: 40,
+    },
     questionPage: {
-        height: height - 120,
         paddingHorizontal: 20,
     },
     questionContent: {
-        flex: 1,
         paddingTop: 8,
     },
     badges: {

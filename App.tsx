@@ -11,6 +11,7 @@ import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { SoundProvider } from './src/context/SoundContext';
 import { AuthProvider } from './src/context/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
+import './src/i18n';
 
 function AppContent() {
   const { colors, isDark } = useTheme();

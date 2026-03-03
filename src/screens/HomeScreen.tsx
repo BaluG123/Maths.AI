@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import GradientBackground from '../components/GradientBackground';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { APP_NAME } from '../utils/constants';
 import { getCompletedQuestions } from '../utils/storageHelper';
 import { getUserScore } from '../utils/storageHelper';
@@ -22,6 +23,7 @@ import { getRankInfo } from '../utils/rankCalculator';
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }: any) {
+    const { t } = useTranslation();
     const { colors } = useTheme();
     const { isSignedIn, user } = useAuth();
     const [completedCount, setCompletedCount] = useState(0);
@@ -143,17 +145,17 @@ export default function HomeScreen({ navigation }: any) {
                     <View style={[styles.statCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
                         <Icon name="check-circle" size={24} color={colors.correct} />
                         <Text style={[styles.statNumber, { color: colors.text }]}>{completedCount}</Text>
-                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>Solved</Text>
+                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.solved')}</Text>
                     </View>
                     <View style={[styles.statCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
                         <Icon name="star" size={24} color={colors.secondary} />
                         <Text style={[styles.statNumber, { color: colors.text }]}>{score}</Text>
-                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>Score</Text>
+                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.score')}</Text>
                     </View>
                     <View style={[styles.statCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
                         <Icon name={rankInfo.icon} size={24} color={rankInfo.color} />
                         <Text style={[styles.statNumber, { color: colors.text }]}>{rankInfo.title}</Text>
-                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>Rank</Text>
+                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.rank')}</Text>
                     </View>
                 </View>
 
@@ -171,7 +173,7 @@ export default function HomeScreen({ navigation }: any) {
                         activeOpacity={0.85}
                         style={[styles.startButton, { shadowColor: colors.primary }]}>
                         <Icon name="play-arrow" size={28} color="#FFFFFF" style={styles.playIcon} />
-                        <Text style={styles.startButtonText}>Start Challenge</Text>
+                        <Text style={styles.startButtonText}>{t('common.start')}</Text>
                         <Icon name="arrow-forward" size={20} color="rgba(255,255,255,0.7)" />
                     </TouchableOpacity>
                 </Animated.View>

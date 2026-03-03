@@ -1,0 +1,45 @@
+{
+    "common": {
+        "start": "Commencer le Défi",
+        "settings": "Paramètres",
+        "score": "Score",
+        "rank": "Rang",
+        "loading": "L'IA génère...",
+        "solved": "Résolu",
+        "points": "Points",
+        "back": "Retour",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "logout": "Déconnexion",
+        "signin": "Se connecter avec Google",
+        "signin_failed": "Échec de la connexion",
+        "try_again": "Veuillez réessayer",
+        "maybe_later": "Plus tard",
+        "unlock": "Débloquer des questions illimitées",
+        "unlock_desc": "Vous avez terminé l'essai gratuit ! Connectez-vous avec Google pour continuer votre voyage mathématique et figurer au classement.",
+        "tagline": "Défiez votre esprit. Élevez votre pensée."
+    },
+    "settings": {
+        "preferences": "PRÉFÉRENCES",
+        "about": "À PROPOS",
+        "dark_mode": "Mode Sombre",
+        "sound": "Effets Sonores",
+        "notifications": "Notifications",
+        "language": "Langue",
+        "version": "Version",
+        "app": "App",
+        "guest": "Joueur Invité",
+        "signout_confirm": "Êtes-vous sûr de vouloir vous déconnecter ?"
+    },
+    "quiz": {
+        "level": "Niveau",
+        "attempts": "tentatives",
+        "show_hint": "Afficher l'indice",
+        "watch_ad": "Regarder une pub pour voir la solution",
+        "solution": "Solution",
+        "answer": "Réponse",
+        "next": "Question suivante",
+        "congrats": "Félicitations !",
+        "completed_all": "Vous avez terminé toutes les questions disponibles !"
+    }
+}
