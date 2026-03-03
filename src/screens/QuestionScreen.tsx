@@ -1,5 +1,5 @@
 // QuestionScreen — Core quiz flow with all game logic
-// Features: paging, 2-trial system, reward ad, AI loading, sign-in gate, sound effects
+// Features: paging, 2-trial system, reward ad, smart loading, sign-in gate, sound effects
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
@@ -12,11 +12,10 @@ import {
     Alert,
     Modal,
     Animated,
-    Easing,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import GradientBackground from '../components/GradientBackground';
-import AILoadingOverlay from '../components/AILoadingOverlay';
+import LoadingOverlay from '../components/LoadingOverlay';
 import ProfileAvatar from '../components/ProfileAvatar';
 import OptionButton from '../components/OptionButton';
 import { useTheme } from '../context/ThemeContext';
@@ -26,7 +25,7 @@ import { useTranslation } from 'react-i18next';
 import {
     FREE_QUESTION_LIMIT,
     MAX_TRIALS_PER_QUESTION,
-    AI_LOADING_DELAY,
+    LOADING_DELAY,
     CORRECT_ANSWER_DELAY,
     CORRECT_ANSWER_POINTS,
     WRONG_ANSWER_PENALTY,
@@ -44,7 +43,7 @@ import { saveUserScore } from '../services/firebaseService';
 import { showRewardAd, loadRewardAd } from '../services/adService';
 import questionsData from '../data/questions.json';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 // Lazy-load localized questions & build O(1) lookup map
 let _localizedMap: Map<string, any> | null = null;
@@ -81,7 +80,7 @@ export default function QuestionScreen({ navigation }: any) {
     const { t, i18n } = useTranslation();
     const { colors } = useTheme();
     const { user, isSignedIn, signInWithGoogle } = useAuth();
-    const { playCorrectSound, playWrongSound } = useSound();
+    const { playCorrectSound, playWrongSound, playLevelUpSound } = useSound();
     const scrollViewRef = useRef<ScrollView>(null);
 
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -91,7 +90,7 @@ export default function QuestionScreen({ navigation }: any) {
     const [showHint, setShowHint] = useState<{ [key: string]: boolean }>({});
     const [showSolution, setShowSolution] = useState<{ [key: string]: boolean }>({});
     const [answered, setAnswered] = useState<{ [key: string]: boolean }>({});
-    const [showAILoading, setShowAILoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [showSignInModal, setShowSignInModal] = useState(false);
     const [score, setScore] = useState(0);
     const [streak, setStreak] = useState(0);
@@ -99,7 +98,6 @@ export default function QuestionScreen({ navigation }: any) {
 
     // Animations
     const headerOpacity = useRef(new Animated.Value(0)).current;
-    const progressAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         initQuestions();
@@ -200,7 +198,7 @@ export default function QuestionScreen({ navigation }: any) {
     const moveToNextQuestion = () => {
         const nextIndex = currentIndex + 1;
 
-        if (nextIndex >= questions.length) {
+        if (nextIndex >= questions.length || nextIndex >= 1000) {
             Alert.alert(t('quiz.congrats'), t('quiz.completed_all'), [
                 { text: t('common.back'), onPress: () => navigation.goBack() },
             ]);
@@ -216,18 +214,18 @@ export default function QuestionScreen({ navigation }: any) {
             return;
         }
 
-        // Show AI loading animation — 2 seconds to simulate AI thinking
-        // 1) Show overlay immediately
-        setShowAILoading(true);
+        // Show smart loading animation
+        setIsLoading(true);
 
-        // 2) Update question behind the overlay so new content is ready
+        // Update question behind the overlay
         setCurrentIndex(nextIndex);
         scrollViewRef.current?.scrollTo({ y: 0, animated: false });
 
-        // 3) Dismiss overlay after 2s to reveal fresh question
+        // Dismiss overlay after delay to reveal fresh question
         setTimeout(() => {
-            setShowAILoading(false);
-        }, AI_LOADING_DELAY);
+            setIsLoading(false);
+            playLevelUpSound();
+        }, LOADING_DELAY);
     };
 
     const handleWatchAd = async (questionId: string) => {
@@ -253,14 +251,14 @@ export default function QuestionScreen({ navigation }: any) {
         }
     };
 
-    // Current question to display (single question at a time for vertical scroll)
+    // Current question to display
     const currentQuestion = questions[currentIndex];
 
-    // Get localized data using O(1) map lookup (memoized)
+    // Get localized data using O(1) map lookup
     const localizedData = useMemo(() => {
         if (!currentQuestion) return null;
         const currentLang = i18n.language;
-        if (currentLang === 'en') return null; // No need to look up English
+        if (currentLang === 'en') return null;
         const map = getLocalizedMap();
         return map.get(currentQuestion.id)?.[currentLang] || null;
     }, [currentQuestion?.id, i18n.language]);
@@ -319,7 +317,7 @@ export default function QuestionScreen({ navigation }: any) {
                         </View>
                     </View>
 
-                    {/* Question text */}
+                    {/* Question card */}
                     <View style={[styles.questionCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
                         <Text style={[styles.questionText, { color: colors.text }]}>{displayQuestion}</Text>
                     </View>
@@ -376,7 +374,7 @@ export default function QuestionScreen({ navigation }: any) {
                         </View>
                     )}
 
-                    {/* Watch Ad button (after max trials and wrong) */}
+                    {/* Watch Ad button */}
                     {triedMaxAndFailed && !solutionVisible && (
                         <TouchableOpacity
                             onPress={() => handleWatchAd(item.id)}
@@ -386,7 +384,7 @@ export default function QuestionScreen({ navigation }: any) {
                         </TouchableOpacity>
                     )}
 
-                    {/* Solution & Explanation (after ad or correct answer) */}
+                    {/* Solution & Explanation */}
                     {(solutionVisible || questionOptionStates.includes('correct')) && (
                         <View style={[styles.solutionCard, { backgroundColor: colors.correctBg, borderColor: colors.correct }]}>
                             <View style={styles.solutionHeader}>
@@ -396,7 +394,7 @@ export default function QuestionScreen({ navigation }: any) {
                             <Text style={[styles.solutionText, { color: colors.text }]}>{t('quiz.answer')}: {displaySolution}</Text>
                             <Text style={[styles.explanationText, { color: colors.textSecondary }]}>{displayExplanation}</Text>
 
-                            {/* Next question button (if solution was revealed via ad) */}
+                            {/* Next question button */}
                             {triedMaxAndFailed && solutionVisible && (
                                 <TouchableOpacity
                                     onPress={moveToNextQuestion}
@@ -416,31 +414,26 @@ export default function QuestionScreen({ navigation }: any) {
         <GradientBackground>
             {/* Header */}
             <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
-                {/* Back button */}
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <Icon name="arrow-back-ios" size={20} color={colors.text} />
                 </TouchableOpacity>
 
-                {/* Level indicator */}
                 <View style={styles.levelContainer}>
                     <Text style={[styles.levelText, { color: colors.textSecondary }]}>{t('quiz.level')}</Text>
                     <Text style={[styles.levelNumber, { color: colors.primary }]}>{levelNumber}</Text>
                 </View>
 
-                {/* Score */}
                 <View style={styles.scoreContainer}>
                     <Icon name="star" size={16} color={colors.secondary} />
                     <Text style={[styles.scoreText, { color: colors.text }]}>{score}</Text>
                 </View>
 
-                {/* Streak */}
                 {streak > 0 && (
                     <View style={[styles.streakBadge, { backgroundColor: colors.wrongBg }]}>
                         <Text style={styles.streakText}>🔥 {streak}</Text>
                     </View>
                 )}
 
-                {/* Profile Avatar */}
                 <ProfileAvatar onPress={() => navigation.navigate('Settings')} size={36} />
             </Animated.View>
 
@@ -457,7 +450,7 @@ export default function QuestionScreen({ navigation }: any) {
                 />
             </View>
 
-            {/* Question content — vertical scroll */}
+            {/* Question content */}
             <ScrollView
                 ref={scrollViewRef}
                 style={styles.scrollContainer}
@@ -468,8 +461,8 @@ export default function QuestionScreen({ navigation }: any) {
                 {renderCurrentQuestion()}
             </ScrollView>
 
-            {/* AI Loading */}
-            <AILoadingOverlay visible={showAILoading} />
+            {/* Smart Loading */}
+            <LoadingOverlay visible={isLoading} />
 
             {/* Sign-In Modal */}
             <Modal visible={showSignInModal} transparent animationType="fade">
@@ -702,7 +695,6 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: '700',
     },
-    // Sign-In Modal
     modalOverlay: {
         flex: 1,
         justifyContent: 'center',

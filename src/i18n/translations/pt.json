@@ -1,11 +1,12 @@
 {
     "common": {
-        "start": "Começar Desafio",
+        "start": "Iniciar Desafio",
         "settings": "Configurações",
         "score": "Pontuação",
         "rank": "Classificação",
-        "loading": "IA gerando...",
-        "solved": "Resolvido",
+        "loading": "Buscando seu próximo desafio...",
+        "loading_2": "Selecionando em mais de 1000 perguntas...",
+        "solved": "Resolvidos",
         "points": "Pontos",
         "back": "Voltar",
         "cancel": "Cancelar",
@@ -14,10 +15,24 @@
         "signin": "Entrar com Google",
         "signin_failed": "Falha ao entrar",
         "try_again": "Por favor, tente novamente",
-        "maybe_later": "Talvez mais tarde",
+        "maybe_later": "Mais tarde",
         "unlock": "Desbloquear Perguntas Ilimitadas",
-        "unlock_desc": "Você completou o teste gratuito! Entre com Google para continuar sua jornada matemática e competir no placar.",
-        "tagline": "Desafie sua mente. Eleve seu pensamento."
+        "unlock_desc": "Você completou o teste gratuito! Entre com o Google para continuar.",
+        "tagline": "Afie sua mente. Teste seu QI.",
+        "leaderboard": "Placar",
+        "top_players": "Melhores Jogadores",
+        "curated_questions": "Banco de Questões",
+        "welcome_back": "Bem-vindo de volta",
+        "free_hint": "As primeiras 5 perguntas são gratuitas. Entre para acesso ilimitado.",
+        "notifications": {
+            "welcome_title": "Bem-vindo ao MathIQ!",
+            "welcome_body": "Bom ter você conosco, {name}. Vamos resolver um pouco de matemática!",
+            "daily_title": "Desafio MathIQ",
+            "daily_body": "Ei {name}, pronto para testar seu QI hoje?",
+            "test_title": "Notificação de teste",
+            "test_body": "Esta é uma notificação de teste para o MathIQ!",
+            "test_button": "Enviar notificação de teste"
+        }
     },
     "settings": {
         "preferences": "PREFERÊNCIAS",
@@ -29,13 +44,13 @@
         "version": "Versão",
         "app": "App",
         "guest": "Jogador Convidado",
-        "signout_confirm": "Tem certeza de que deseja sair?"
+        "signout_confirm": "Tem certeza que deseja sair?"
     },
     "quiz": {
         "level": "Nível",
         "attempts": "tentativas",
         "show_hint": "Mostrar Dica",
-        "watch_ad": "Assistir anúncio para ver a solução",
+        "watch_ad": "Ver anúncio para ver solução",
         "solution": "Solução",
         "answer": "Resposta",
         "next": "Próxima Pergunta",

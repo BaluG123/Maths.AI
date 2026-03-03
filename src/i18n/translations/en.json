@@ -4,7 +4,8 @@
         "settings": "Settings",
         "score": "Score",
         "rank": "Rank",
-        "loading": "AI is generating...",
+        "loading": "Finding your next challenge...",
+        "loading_2": "Curating from 1000+ questions...",
         "solved": "Solved",
         "points": "Points",
         "back": "Back",
@@ -17,7 +18,21 @@
         "maybe_later": "Maybe later",
         "unlock": "Unlock Unlimited Questions",
         "unlock_desc": "You've completed the free trial! Sign in with Google to continue your math journey and compete on the leaderboard.",
-        "tagline": "Challenge your mind. Elevate your thinking."
+        "tagline": "Sharpen Your Mind. Test Your IQ.",
+        "leaderboard": "Leaderboard",
+        "top_players": "Top Players",
+        "curated_questions": "Curated Question Bank",
+        "welcome_back": "Welcome back",
+        "free_hint": "First 5 questions are free. Sign in for unlimited access.",
+        "notifications": {
+            "welcome_title": "Welcome to MathIQ!",
+            "welcome_body": "Glad to have you with us, {name}. Let's solve some math!",
+            "daily_title": "MathIQ Challenge",
+            "daily_body": "Hey {name}, ready to test your IQ today?",
+            "test_title": "Test Notification",
+            "test_body": "This is a test notification for MathIQ!",
+            "test_button": "Send Test Notification"
+        }
     },
     "settings": {
         "preferences": "PREFERENCES",

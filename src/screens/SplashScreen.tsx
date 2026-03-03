@@ -1,4 +1,4 @@
-// SplashScreen — Animated AI-themed branding intro
+// SplashScreen — Animated MathIQ branding intro
 
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
@@ -183,7 +183,7 @@ export default function SplashScreen({ navigation }: any) {
                     },
                 ]}>
                 <View style={styles.logoInner}>
-                    <Icon name="psychology" size={64} color="#6C63FF" />
+                    <Icon name="functions" size={64} color="#6C63FF" />
                 </View>
             </Animated.View>
 
@@ -196,7 +196,7 @@ export default function SplashScreen({ navigation }: any) {
                         transform: [{ translateY: titleTranslate }],
                     },
                 ]}>
-                {APP_NAME}
+                MathIQ
             </Animated.Text>
 
             {/* Tagline */}

@@ -4,20 +4,35 @@
         "settings": "Paramètres",
         "score": "Score",
         "rank": "Rang",
-        "loading": "L'IA génère...",
-        "solved": "Résolu",
+        "loading": "Recherche de votre prochain défi...",
+        "loading_2": "Sélection parmi 1000+ questions...",
+        "solved": "Résolus",
         "points": "Points",
         "back": "Retour",
         "cancel": "Annuler",
         "save": "Enregistrer",
-        "logout": "Déconnexion",
+        "logout": "Se Déconnecter",
         "signin": "Se connecter avec Google",
         "signin_failed": "Échec de la connexion",
         "try_again": "Veuillez réessayer",
         "maybe_later": "Plus tard",
-        "unlock": "Débloquer des questions illimitées",
-        "unlock_desc": "Vous avez terminé l'essai gratuit ! Connectez-vous avec Google pour continuer votre voyage mathématique et figurer au classement.",
-        "tagline": "Défiez votre esprit. Élevez votre pensée."
+        "unlock": "Débloquer les Questions Illimitées",
+        "unlock_desc": "Vous avez terminé l'essai gratuit ! Connectez-vous avec Google pour continuer.",
+        "tagline": "Aiguisez votre esprit. Testez votre QI.",
+        "leaderboard": "Classement",
+        "top_players": "Meilleurs Joueurs",
+        "curated_questions": "Banque de Questions",
+        "welcome_back": "Bon retour",
+        "free_hint": "Les 5 premières questions sont gratuites. Connectez-vous pour un accès illimité.",
+        "notifications": {
+            "welcome_title": "Bienvenue sur MathIQ !",
+            "welcome_body": "Ravi de vous avoir parmi nous, {name}. Résolvons un peu de maths !",
+            "daily_title": "Défi MathIQ",
+            "daily_body": "Hé {name}, prêt à tester votre QI aujourd'hui ?",
+            "test_title": "Notification de test",
+            "test_body": "Ceci est une notification de test pour MathIQ !",
+            "test_button": "Envoyer une notification de test"
+        }
     },
     "settings": {
         "preferences": "PRÉFÉRENCES",
@@ -27,19 +42,19 @@
         "notifications": "Notifications",
         "language": "Langue",
         "version": "Version",
-        "app": "App",
+        "app": "Application",
         "guest": "Joueur Invité",
         "signout_confirm": "Êtes-vous sûr de vouloir vous déconnecter ?"
     },
     "quiz": {
         "level": "Niveau",
         "attempts": "tentatives",
-        "show_hint": "Afficher l'indice",
+        "show_hint": "Afficher l'Indice",
         "watch_ad": "Regarder une pub pour voir la solution",
         "solution": "Solution",
         "answer": "Réponse",
-        "next": "Question suivante",
+        "next": "Question Suivante",
         "congrats": "Félicitations !",
-        "completed_all": "Vous avez terminé toutes les questions disponibles !"
+        "completed_all": "Vous avez complété toutes les questions disponibles !"
     }
 }

@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import NotificationService from '../services/NotificationService';
 
 interface AuthContextType {
     user: FirebaseAuthTypes.User | null;
@@ -45,8 +46,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Listen for auth state changes
         const unsubscribe = auth().onAuthStateChanged(firebaseUser => {
+            const isNewLogin = !user && firebaseUser;
             setUser(firebaseUser);
             setIsLoading(false);
+
+            if (isNewLogin && firebaseUser.displayName) {
+                NotificationService.sendWelcomeNotification(firebaseUser.displayName);
+                NotificationService.scheduleDailyReminder(firebaseUser.displayName);
+            }
         });
 
         return unsubscribe;

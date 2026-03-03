@@ -1,4 +1,4 @@
-// Math.AI Color Palette — Premium Dark/Light themes
+// MathIQ Color Palette — Premium Dark/Light themes
 
 export const Colors = {
     dark: {

@@ -1,4 +1,4 @@
-// AI Loading Overlay — "AI is generating your next challenge..."
+// Question Loading Overlay — "Finding your next challenge..."
 
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
@@ -10,7 +10,7 @@ interface Props {
     visible: boolean;
 }
 
-export default function AILoadingOverlay({ visible }: Props) {
+export default function LoadingOverlay({ visible }: Props) {
     const { colors } = useTheme();
     const { t } = useTranslation();
     const spinAnim = useRef(new Animated.Value(0)).current;
@@ -23,7 +23,7 @@ export default function AILoadingOverlay({ visible }: Props) {
 
     const thinkingTexts = [
         t('common.loading'),
-        '🔢 ' + t('common.loading'),
+        t('common.loading_2'),
     ];
 
     useEffect(() => {
@@ -86,7 +86,7 @@ export default function AILoadingOverlay({ visible }: Props) {
             animateDot(dotAnim2, 200);
             animateDot(dotAnim3, 400);
 
-            // Thinking phase text switcher — gives AI "thinking" feel
+            // Thinking phase text switcher
             const interval = setInterval(() => {
                 setThinkingPhase(prev => (prev + 1) % thinkingTexts.length);
             }, 1000);
@@ -105,7 +105,7 @@ export default function AILoadingOverlay({ visible }: Props) {
             dotAnim3.setValue(0);
             setThinkingPhase(0);
         };
-    }, [visible]);
+    }, [visible, fadeAnim, pulseAnim, spinAnim, dotAnim1, dotAnim2, dotAnim3, thinkingTexts.length]);
 
     if (!visible) return null;
 
@@ -120,12 +120,12 @@ export default function AILoadingOverlay({ visible }: Props) {
                 {/* Glowing ring */}
                 <View style={[styles.glowRing, { borderColor: colors.primary, shadowColor: colors.primary }]}>
                     <Animated.View style={{ transform: [{ rotate: spin }, { scale: pulseAnim }] }}>
-                        <Icon name="psychology" size={48} color={colors.primary} />
+                        <Icon name="lightbulb" size={48} color={colors.primary} />
                     </Animated.View>
                 </View>
 
                 {/* Text with dots */}
-                <Text style={[styles.title, { color: colors.text }]}>{thinkingTexts[thinkingPhase]}</Text>
+                <Text style={[styles.title, { color: colors.text, textAlign: 'center' }]}>{thinkingTexts[thinkingPhase]}</Text>
                 <View style={styles.dotsContainer}>
                     <View style={styles.dots}>
                         {[dotAnim1, dotAnim2, dotAnim3].map((anim, i) => (
@@ -189,6 +189,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 48,
         alignItems: 'center',
         elevation: 20,
+        width: '85%',
         shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.3,
         shadowRadius: 20,
@@ -207,10 +208,11 @@ const styles = StyleSheet.create({
         elevation: 10,
     },
     title: {
-        fontSize: 22,
+        fontSize: 18,
         fontWeight: '700',
         marginBottom: 8,
         letterSpacing: 0.5,
+        minHeight: 50,
     },
     dotsContainer: {
         flexDirection: 'row',

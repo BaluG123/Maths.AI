@@ -5,11 +5,11 @@
 //   - levelup.mp3
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import Sound from 'react-native-sound';
 import { getSoundEnabled, setSoundEnabled as saveSoundEnabled } from '../utils/storageHelper';
 
-// We'll use a simple approach without react-native-sound for now
-// since it requires platform-specific audio files to be bundled.
-// Sound playback will be a no-op placeholder until user adds audio files.
+// Enable playback in silence mode
+Sound.setCategory('Playback');
 
 interface SoundContextType {
     soundEnabled: boolean;
@@ -40,23 +40,34 @@ export function SoundProvider({ children }: { children: ReactNode }) {
         saveSoundEnabled(newVal);
     };
 
-    const playCorrectSound = useCallback(() => {
+    const playSound = useCallback((fileName: string) => {
         if (!soundEnabled) return;
-        // Sound playback placeholder - uncomment when audio files are added:
-        // const sound = new Sound('correct.mp3', Sound.MAIN_BUNDLE, (error) => {
-        //   if (!error) sound.play(() => sound.release());
-        // });
+
+        const sound = new Sound(fileName, Sound.MAIN_BUNDLE, (error) => {
+            if (error) {
+                console.log('Failed to load sound', error);
+                return;
+            }
+            sound.play((success) => {
+                if (!success) {
+                    console.log('Playback failed due to audio decoding errors');
+                }
+                sound.release(); // Free memory
+            });
+        });
     }, [soundEnabled]);
+
+    const playCorrectSound = useCallback(() => {
+        playSound('correct.mp3');
+    }, [playSound]);
 
     const playWrongSound = useCallback(() => {
-        if (!soundEnabled) return;
-        // Sound playback placeholder
-    }, [soundEnabled]);
+        playSound('wrong.mp3');
+    }, [playSound]);
 
     const playLevelUpSound = useCallback(() => {
-        if (!soundEnabled) return;
-        // Sound playback placeholder
-    }, [soundEnabled]);
+        playSound('levelup.mp3');
+    }, [playSound]);
 
     return (
         <SoundContext.Provider

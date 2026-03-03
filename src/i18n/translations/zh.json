@@ -2,22 +2,37 @@
     "common": {
         "start": "开始挑战",
         "settings": "设置",
-        "score": "得分",
+        "score": "分数",
         "rank": "排名",
-        "loading": "AI 正在生成...",
+        "loading": "正在寻找您的下一个挑战...",
+        "loading_2": "正在从1000多个问题中精选...",
         "solved": "已解决",
-        "points": "分数",
+        "points": "积分",
         "back": "返回",
         "cancel": "取消",
         "save": "保存",
-        "logout": "退出",
+        "logout": "退出登录",
         "signin": "使用 Google 登录",
         "signin_failed": "登录失败",
         "try_again": "请重试",
         "maybe_later": "以后再说",
-        "unlock": "解锁无限题目",
-        "unlock_desc": "您已完成免费试用！使用 Google 登录以继续您的数学之旅并在排行榜上竞争。",
-        "tagline": "挑战你的头脑。提升你的思维。"
+        "unlock": "解锁无限问题",
+        "unlock_desc": "您已完成免费试用！请使用 Google 登录以继续您的数学之旅。",
+        "tagline": "磨练你的思维。测试你的智商。",
+        "leaderboard": "排行榜",
+        "top_players": "顶级玩家",
+        "curated_questions": "精选题库",
+        "welcome_back": "欢迎回来",
+        "free_hint": "前5个问题免费。登录以获得无限访问权限。",
+        "notifications": {
+            "welcome_title": "欢迎来到 MathIQ！",
+            "welcome_body": "很高兴你能加入我们，{name}。让我们来解一些数学题吧！",
+            "daily_title": "MathIQ 挑战",
+            "daily_body": "嘿 {name}，今天准备好测试你的智商了吗？",
+            "test_title": "测试通知",
+            "test_body": "这是 MathIQ 的测试通知！",
+            "test_button": "发送测试通知"
+        }
     },
     "settings": {
         "preferences": "偏好设置",
@@ -29,17 +44,17 @@
         "version": "版本",
         "app": "应用",
         "guest": "访客玩家",
-        "signout_confirm": "确定要退出登录吗？"
+        "signout_confirm": "您确定要退出登录吗？"
     },
     "quiz": {
-        "level": "级别",
-        "attempts": "次尝试",
+        "level": "等级",
+        "attempts": "尝试次数",
         "show_hint": "显示提示",
-        "watch_ad": "观看广告查看解答",
-        "solution": "解答",
+        "watch_ad": "观看广告以查看解决方案",
+        "solution": "解决方案",
         "answer": "答案",
         "next": "下一题",
         "congrats": "恭喜！",
-        "completed_all": "您已完成所有可用题目！"
+        "completed_all": "您已完成所有可用问题！"
     }
 }

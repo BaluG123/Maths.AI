@@ -27,6 +27,7 @@ import {
 import { getRankInfo } from '../utils/rankCalculator';
 import { getUserRank } from '../services/firebaseService';
 import { APP_NAME, APP_VERSION } from '../utils/constants';
+import NotificationService from '../services/NotificationService';
 
 export default function SettingsScreen({ navigation }: any) {
     const { t, i18n } = useTranslation();
@@ -268,7 +269,20 @@ export default function SettingsScreen({ navigation }: any) {
                 <View style={[styles.settingsSection, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
                     <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{t('settings.about')}</Text>
                     <SettingRow icon="info-outline" label={t('settings.version')} rightText={APP_VERSION} iconColor={colors.textSecondary} />
-                    <SettingRow icon="psychology" label={t('settings.app')} rightText={APP_NAME} iconColor={colors.primary} />
+                    <SettingRow icon="functions" label={t('settings.app')} rightText={APP_NAME} iconColor={colors.primary} />
+
+                    {/* Test Notification Row */}
+                    <TouchableOpacity onPress={() => NotificationService.sendTestNotification()}>
+                        <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+                            <View style={[styles.settingIcon, { backgroundColor: `${colors.secondary}15` }]}>
+                                <Icon name="notification-important" size={22} color={colors.secondary} />
+                            </View>
+                            <Text style={[styles.settingLabel, { color: colors.text }]}>
+                                {t('common.notifications.test_button')}
+                            </Text>
+                            <Icon name="chevron-right" size={24} color={colors.textMuted} />
+                        </View>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Sign Out */}

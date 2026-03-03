@@ -1,4 +1,4 @@
-// HomeScreen — Main landing screen with branding + Start Challenge CTA
+// HomeScreen — Main landing screen with branding + Start Challenge CTA + Leaderboard
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -9,6 +9,8 @@ import {
     Animated,
     Easing,
     Dimensions,
+    ScrollView,
+    Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import GradientBackground from '../components/GradientBackground';
@@ -19,6 +21,7 @@ import { APP_NAME } from '../utils/constants';
 import { getCompletedQuestions } from '../utils/storageHelper';
 import { getUserScore } from '../utils/storageHelper';
 import { getRankInfo } from '../utils/rankCalculator';
+import { getLeaderboard, UserRanking } from '../services/firebaseService';
 
 const { width } = Dimensions.get('window');
 
@@ -28,12 +31,14 @@ export default function HomeScreen({ navigation }: any) {
     const { isSignedIn, user } = useAuth();
     const [completedCount, setCompletedCount] = useState(0);
     const [score, setScore] = useState(0);
+    const [leaderboard, setLeaderboard] = useState<UserRanking[]>([]);
+    const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
 
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(40)).current;
     const buttonScale = useRef(new Animated.Value(0.8)).current;
-    const buttonGlow = useRef(new Animated.Value(0.4)).current;
+    const boardFade = useRef(new Animated.Value(0)).current;
     const floatingAnims = useRef(
         Array.from({ length: 6 }, () => ({
             translateY: new Animated.Value(0),
@@ -43,6 +48,7 @@ export default function HomeScreen({ navigation }: any) {
 
     useEffect(() => {
         loadStats();
+        loadLeaderboard();
 
         // Entrance animations
         Animated.parallel([
@@ -50,14 +56,6 @@ export default function HomeScreen({ navigation }: any) {
             Animated.spring(slideAnim, { toValue: 0, tension: 50, friction: 8, useNativeDriver: true }),
             Animated.spring(buttonScale, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true, delay: 300 }),
         ]).start();
-
-        // Button glow
-        Animated.loop(
-            Animated.sequence([
-                Animated.timing(buttonGlow, { toValue: 1, duration: 1500, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-                Animated.timing(buttonGlow, { toValue: 0.4, duration: 1500, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-            ]),
-        ).start();
 
         // Floating symbols
         floatingAnims.forEach((anim, i) => {
@@ -74,7 +72,7 @@ export default function HomeScreen({ navigation }: any) {
                 ]),
             ).start();
         });
-    }, [fadeAnim, slideAnim, buttonScale, buttonGlow, floatingAnims]);
+    }, [fadeAnim, slideAnim, buttonScale, floatingAnims]);
 
     const loadStats = async () => {
         const completed = await getCompletedQuestions();
@@ -83,185 +81,287 @@ export default function HomeScreen({ navigation }: any) {
         setScore(s);
     };
 
+    const loadLeaderboard = async () => {
+        setLoadingLeaderboard(true);
+        const top10 = await getLeaderboard(10);
+        setLeaderboard(top10);
+        setLoadingLeaderboard(false);
+        Animated.timing(boardFade, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+        }).start();
+    };
+
     // Reload stats when screen focuses
     useEffect(() => {
-        const unsubscribe = navigation.addListener('focus', loadStats);
+        const unsubscribe = navigation.addListener('focus', () => {
+            loadStats();
+            loadLeaderboard();
+        });
         return unsubscribe;
     }, [navigation]);
 
     const rankInfo = getRankInfo(score);
     const mathSymbols = ['∑', 'π', '∫', '√', 'Δ', '∞'];
     const symbolPositions = [
-        { top: '15%', left: '10%' },
-        { top: '20%', right: '15%' },
-        { top: '45%', left: '5%' },
-        { top: '50%', right: '8%' },
-        { top: '70%', left: '12%' },
-        { top: '75%', right: '10%' },
+        { top: '10%', left: '10%' },
+        { top: '15%', right: '15%' },
+        { top: '35%', left: '5%' },
+        { top: '40%', right: '8%' },
+        { top: '60%', left: '12%' },
+        { top: '65%', right: '10%' },
     ];
+
+    const renderLeaderboardItem = (item: UserRanking, index: number) => {
+        const isMe = item.userId === user?.uid;
+        return (
+            <View key={item.userId} style={[styles.boardItem, { borderBottomColor: colors.border }]}>
+                <View style={styles.boardLeft}>
+                    <Text style={[styles.boardRank, { color: colors.textSecondary }]}>{index + 1}</Text>
+                    {item.photoURL ? (
+                        <Image source={{ uri: item.photoURL }} style={styles.boardAvatar} />
+                    ) : (
+                        <View style={[styles.boardAvatarPlaceholder, { backgroundColor: colors.surfaceElevated }]}>
+                            <Icon name="person" size={20} color={colors.textMuted} />
+                        </View>
+                    )}
+                    <Text style={[styles.boardName, { color: colors.text, fontWeight: isMe ? '700' : '400' }]} numberOfLines={1}>
+                        {isMe ? 'You' : item.displayName || t('settings.guest')}
+                    </Text>
+                </View>
+                <View style={styles.boardRight}>
+                    <Text style={[styles.boardScore, { color: colors.primary }]}>{item.score}</Text>
+                </View>
+            </View>
+        );
+    };
+
+    const renderTop3 = () => {
+        if (leaderboard.length === 0) return null;
+        const top3 = leaderboard.slice(0, 3);
+        const order = [1, 0, 2]; // Silver, Gold, Bronze
+        const config = [
+            { label: '2nd', color: '#C0C0C0', size: 70, icon: 'emoji-events' },
+            { label: '1st', color: '#FFD700', size: 90, icon: 'emoji-events' },
+            { label: '3rd', color: '#CD7F32', size: 70, icon: 'emoji-events' },
+        ];
+
+        return (
+            <View style={styles.top3Row}>
+                {order.map((idx) => {
+                    const player = top3[idx];
+                    if (!player) return <View key={idx} style={{ flex: 1 }} />;
+                    const conf = config[idx];
+                    return (
+                        <View key={player.userId} style={styles.top3Podium}>
+                            <View style={[styles.top3AvatarContainer, { borderColor: conf.color, width: conf.size, height: conf.size }]}>
+                                {player.photoURL ? (
+                                    <Image source={{ uri: player.photoURL }} style={[styles.top3Avatar, { width: conf.size - 6, height: conf.size - 6 }]} />
+                                ) : (
+                                    <View style={[styles.top3AvatarPlaceholder, { width: conf.size - 6, height: conf.size - 6 }]}>
+                                        <Icon name="person" size={conf.size / 2} color={colors.textMuted} />
+                                    </View>
+                                )}
+                                <View style={[styles.rankBadge, { backgroundColor: conf.color }]}>
+                                    <Text style={styles.rankBadgeText}>{conf.label}</Text>
+                                </View>
+                            </View>
+                            <Text style={[styles.top3Name, { color: colors.text }]} numberOfLines={1}>{player.displayName?.split(' ')[0]}</Text>
+                            <Text style={[styles.top3Score, { color: colors.primary }]}>{player.score}</Text>
+                        </View>
+                    );
+                })}
+            </View>
+        );
+    };
 
     return (
         <GradientBackground>
-            {/* Floating math symbols */}
-            {mathSymbols.map((symbol, i) => (
-                <Animated.Text
-                    key={i}
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+                {/* Floating math symbols */}
+                {mathSymbols.map((symbol, i) => (
+                    <Animated.Text
+                        key={i}
+                        style={[
+                            styles.floatingSymbol,
+                            symbolPositions[i] as any,
+                            {
+                                color: colors.primary,
+                                opacity: floatingAnims[i].opacity,
+                                transform: [{ translateY: floatingAnims[i].translateY }],
+                            },
+                        ]}>
+                        {symbol}
+                    </Animated.Text>
+                ))}
+
+                <Animated.View
                     style={[
-                        styles.floatingSymbol,
-                        symbolPositions[i] as any,
+                        styles.content,
                         {
-                            color: colors.primary,
-                            opacity: floatingAnims[i].opacity,
-                            transform: [{ translateY: floatingAnims[i].translateY }],
+                            opacity: fadeAnim,
+                            transform: [{ translateY: slideAnim }],
                         },
                     ]}>
-                    {symbol}
-                </Animated.Text>
-            ))}
 
-            <Animated.View
-                style={[
-                    styles.content,
-                    {
-                        opacity: fadeAnim,
-                        transform: [{ translateY: slideAnim }],
-                    },
-                ]}>
-                {/* Brain Logo */}
-                <View style={[styles.logoWrapper, { shadowColor: colors.primary }]}>
-                    <View style={[styles.logoBg, { backgroundColor: colors.primaryGlow, borderColor: colors.primary }]}>
-                        <Icon name="psychology" size={56} color={colors.primary} />
+                    {/* Brand Header */}
+                    <View style={styles.header}>
+                        <View style={[styles.logoWrapper, { shadowColor: colors.primary }]}>
+                            <View style={[styles.logoBg, { backgroundColor: colors.primaryGlow, borderColor: colors.primary }]}>
+                                <Icon name="functions" size={48} color={colors.primary} />
+                            </View>
+                        </View>
+                        <Text style={[styles.appName, { color: colors.text }]}>{APP_NAME}</Text>
+                        <Text style={[styles.appSubtitle, { color: colors.textSecondary }]}>
+                            {t('common.tagline')}
+                        </Text>
                     </View>
-                </View>
 
-                {/* App Name */}
-                <Text style={[styles.appName, { color: colors.text }]}>{APP_NAME}</Text>
-                <Text style={[styles.appSubtitle, { color: colors.textSecondary }]}>
-                    Challenge your mind. Elevate your thinking.
-                </Text>
+                    {/* Stats Row */}
+                    <View style={styles.statsRow}>
+                        <View style={[styles.statCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
+                            <Icon name="check-circle" size={20} color={colors.correct} />
+                            <Text style={[styles.statNumber, { color: colors.text }]}>{completedCount}</Text>
+                            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.solved')}</Text>
+                        </View>
+                        <View style={[styles.statCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
+                            <Icon name="star" size={20} color={colors.secondary} />
+                            <Text style={[styles.statNumber, { color: colors.text }]}>{score}</Text>
+                            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.score')}</Text>
+                        </View>
+                        <View style={[styles.statCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
+                            <Icon name={rankInfo.icon} size={20} color={rankInfo.color} />
+                            <Text style={[styles.statNumber, { color: colors.text }]}>{rankInfo.title}</Text>
+                            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.rank')}</Text>
+                        </View>
+                    </View>
 
-                {/* Stats Cards */}
-                <View style={styles.statsRow}>
-                    <View style={[styles.statCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
-                        <Icon name="check-circle" size={24} color={colors.correct} />
-                        <Text style={[styles.statNumber, { color: colors.text }]}>{completedCount}</Text>
-                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.solved')}</Text>
-                    </View>
-                    <View style={[styles.statCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
-                        <Icon name="star" size={24} color={colors.secondary} />
-                        <Text style={[styles.statNumber, { color: colors.text }]}>{score}</Text>
-                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.score')}</Text>
-                    </View>
-                    <View style={[styles.statCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
-                        <Icon name={rankInfo.icon} size={24} color={rankInfo.color} />
-                        <Text style={[styles.statNumber, { color: colors.text }]}>{rankInfo.title}</Text>
-                        <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('common.rank')}</Text>
-                    </View>
-                </View>
-
-                {/* Start Button */}
-                <Animated.View
-                    style={{
-                        transform: [{ scale: buttonScale }],
-                        opacity: buttonGlow.interpolate({
-                            inputRange: [0.4, 1],
-                            outputRange: [0.9, 1],
-                        }),
-                    }}>
+                    {/* Main CTA */}
                     <TouchableOpacity
                         onPress={() => navigation.navigate('Question')}
                         activeOpacity={0.85}
-                        style={[styles.startButton, { shadowColor: colors.primary }]}>
+                        style={[styles.startButton, { shadowColor: colors.primary, transform: [{ scale: 1 }] }]}>
                         <Icon name="play-arrow" size={28} color="#FFFFFF" style={styles.playIcon} />
                         <Text style={styles.startButtonText}>{t('common.start')}</Text>
                         <Icon name="arrow-forward" size={20} color="rgba(255,255,255,0.7)" />
                     </TouchableOpacity>
-                </Animated.View>
 
-                {/* Sign-in prompt */}
-                {!isSignedIn && (
-                    <View style={styles.signInHint}>
-                        <Icon name="info-outline" size={16} color={colors.textMuted} />
-                        <Text style={[styles.signInText, { color: colors.textMuted }]}>
-                            First 5 questions are free. Sign in for unlimited access.
-                        </Text>
-                    </View>
-                )}
-
-                {/* Signed in greeting */}
-                {isSignedIn && user && (
-                    <View style={styles.greeting}>
+                    {/* Greeting */}
+                    {isSignedIn && user && (
                         <Text style={[styles.greetingText, { color: colors.textSecondary }]}>
-                            Welcome back, {user.displayName?.split(' ')[0]}! 🧠
+                            {t('common.welcome_back')}, {user.displayName?.split(' ')[0]}! 🏆
                         </Text>
-                    </View>
-                )}
-            </Animated.View>
+                    )}
+
+                    {!isSignedIn && (
+                        <View style={styles.signInHint}>
+                            <Icon name="info-outline" size={14} color={colors.textMuted} />
+                            <Text style={[styles.signInText, { color: colors.textMuted }]}>
+                                {t('common.free_hint')}
+                            </Text>
+                        </View>
+                    )}
+
+                    {/* Leaderboard Section */}
+                    <Animated.View style={[styles.leaderboardSection, { opacity: boardFade }]}>
+                        <View style={styles.sectionHeader}>
+                            <Icon name="emoji-events" size={24} color={colors.secondary} />
+                            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('common.leaderboard')}</Text>
+                        </View>
+
+                        {loadingLeaderboard ? (
+                            <View style={styles.loadingContainer}>
+                                <Text style={{ color: colors.textMuted }}>{t('common.loading')}</Text>
+                            </View>
+                        ) : leaderboard.length > 0 ? (
+                            <View style={[styles.boardCard, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
+                                {renderTop3()}
+                                <View style={styles.boardList}>
+                                    {leaderboard.slice(3).map((item, index) => renderLeaderboardItem(item, index + 3))}
+                                </View>
+                            </View>
+                        ) : (
+                            <View style={styles.emptyContainer}>
+                                <Text style={{ color: colors.textMuted }}>No rankings available yet.</Text>
+                            </View>
+                        )}
+                    </Animated.View>
+
+                    <View style={{ height: 40 }} />
+                </Animated.View>
+            </ScrollView>
         </GradientBackground>
     );
 }
 
 const styles = StyleSheet.create({
+    scrollContent: {
+        flexGrow: 1,
+        paddingTop: 60,
+    },
     content: {
-        flex: 1,
-        justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 32,
+        paddingHorizontal: 24,
+    },
+    header: {
+        alignItems: 'center',
+        marginBottom: 32,
     },
     floatingSymbol: {
         position: 'absolute',
-        fontSize: 36,
+        fontSize: 32,
         fontWeight: '200',
         zIndex: -1,
     },
     logoWrapper: {
-        marginBottom: 24,
+        marginBottom: 16,
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.4,
-        shadowRadius: 30,
-        elevation: 20,
+        shadowRadius: 20,
+        elevation: 15,
     },
     logoBg: {
-        width: 110,
-        height: 110,
-        borderRadius: 55,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
         borderWidth: 2,
         justifyContent: 'center',
         alignItems: 'center',
     },
     appName: {
-        fontSize: 44,
+        fontSize: 40,
         fontWeight: '800',
         letterSpacing: 2,
-        marginBottom: 8,
+        marginBottom: 4,
     },
     appSubtitle: {
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: '400',
         letterSpacing: 0.5,
-        marginBottom: 40,
         textAlign: 'center',
+        opacity: 0.8,
     },
     statsRow: {
         flexDirection: 'row',
-        gap: 12,
-        marginBottom: 40,
+        gap: 10,
+        marginBottom: 32,
     },
     statCard: {
         alignItems: 'center',
-        paddingVertical: 16,
-        paddingHorizontal: 18,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
         borderRadius: 16,
         borderWidth: 1,
-        minWidth: (width - 100) / 3,
+        flex: 1,
     },
     statNumber: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '700',
-        marginTop: 6,
+        marginTop: 4,
     },
     statLabel: {
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: '500',
         marginTop: 2,
         textTransform: 'uppercase',
@@ -271,14 +371,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#6C63FF',
-        paddingVertical: 18,
-        paddingHorizontal: 36,
-        borderRadius: 28,
+        paddingVertical: 16,
+        paddingHorizontal: 40,
+        borderRadius: 30,
         gap: 12,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.4,
-        shadowRadius: 16,
-        elevation: 12,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+        elevation: 10,
+        marginBottom: 20,
     },
     playIcon: {
         marginRight: -4,
@@ -289,22 +390,147 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         letterSpacing: 0.5,
     },
+    greetingText: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 10,
+    },
     signInHint: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 24,
-        gap: 8,
-        paddingHorizontal: 20,
+        gap: 6,
+        marginBottom: 10,
     },
     signInText: {
         fontSize: 12,
-        fontWeight: '400',
     },
-    greeting: {
-        marginTop: 24,
+    leaderboardSection: {
+        width: '100%',
+        marginTop: 20,
     },
-    greetingText: {
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        marginBottom: 16,
+        paddingLeft: 4,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        letterSpacing: 0.5,
+    },
+    boardCard: {
+        borderRadius: 24,
+        borderWidth: 1,
+        padding: 20,
+        overflow: 'hidden',
+    },
+    top3Row: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        gap: 15,
+        marginBottom: 24,
+        paddingBottom: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255,255,255,0.05)',
+    },
+    top3Podium: {
+        alignItems: 'center',
+        flex: 1,
+    },
+    top3AvatarContainer: {
+        borderRadius: 100,
+        borderWidth: 3,
+        padding: 3,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    top3Avatar: {
+        borderRadius: 100,
+    },
+    top3AvatarPlaceholder: {
+        borderRadius: 100,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    rankBadge: {
+        position: 'absolute',
+        bottom: -5,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#000',
+    },
+    rankBadgeText: {
+        color: '#000',
+        fontSize: 10,
+        fontWeight: '800',
+    },
+    top3Name: {
+        fontSize: 12,
+        fontWeight: '600',
+        marginBottom: 2,
+        maxWidth: 70,
+    },
+    top3Score: {
         fontSize: 14,
-        fontWeight: '500',
+        fontWeight: '800',
+    },
+    boardList: {
+        gap: 4,
+    },
+    boardItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderBottomWidth: 0.5,
+    },
+    boardLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        flex: 1,
+    },
+    boardRank: {
+        fontSize: 14,
+        fontWeight: '600',
+        width: 15,
+    },
+    boardAvatar: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+    },
+    boardAvatarPlaceholder: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    boardName: {
+        fontSize: 14,
+        flex: 1,
+    },
+    boardRight: {
+        alignItems: 'flex-end',
+    },
+    boardScore: {
+        fontSize: 15,
+        fontWeight: '700',
+    },
+    loadingContainer: {
+        padding: 40,
+        alignItems: 'center',
+    },
+    emptyContainer: {
+        padding: 40,
+        alignItems: 'center',
     },
 });
