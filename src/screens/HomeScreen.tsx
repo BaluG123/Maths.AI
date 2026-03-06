@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import GradientBackground from '../components/GradientBackground';
+import AdBanner from '../components/AdBanner';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -287,6 +288,9 @@ export default function HomeScreen({ navigation }: any) {
                             </View>
                         )}
                     </Animated.View>
+
+                    {/* Banner Ad — non-intrusive, at end of content */}
+                    <AdBanner style={{ marginTop: 24 }} />
 
                     <View style={{ height: 40 }} />
                 </Animated.View>

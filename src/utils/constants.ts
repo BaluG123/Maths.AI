@@ -20,7 +20,13 @@ export const CORRECT_ANSWER_DELAY = 1500;
 export const SPLASH_DURATION = 3000;
 
 // AdMob Unit IDs (test IDs — replace with real ones for production)
-export const ADMOB_REWARD_AD_ID = 'ca-app-pub-3940256099942544/5224354917';
+export const ADMOB_REWARD_AD_ID = 'ca-app-pub-2627956667785383/1005088037';
+export const ADMOB_INTERSTITIAL_AD_ID = 'ca-app-pub-2627956667785383/9497346211';
+export const ADMOB_APP_OPEN_AD_ID = 'ca-app-pub-2627956667785383/6623770866';
+export const ADMOB_BANNER_AD_ID = 'ca-app-pub-2627956667785383/5310689196';
+
+// Show interstitial ad every N questions (natural break)
+export const INTERSTITIAL_FREQUENCY = 5;
 
 // Rank thresholds
 export const RANK_TIERS = [

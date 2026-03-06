@@ -3,8 +3,8 @@
  * Main Entry Point
  */
 
-import React from 'react';
-import { StatusBar } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { StatusBar, AppState, AppStateStatus } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
@@ -13,10 +13,12 @@ import { AuthProvider } from './src/context/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import NotificationService from './src/services/NotificationService';
 import NotificationPermissionModal from './src/components/NotificationPermissionModal';
+import { loadAppOpenAd, showAppOpenAd } from './src/services/adService';
 
 function AppContent() {
   const { colors, isDark } = useTheme();
   const [isModalVisible, setIsModalVisible] = React.useState(false);
+  const appState = useRef(AppState.currentState);
 
   React.useEffect(() => {
     // Bind modal control to service
@@ -24,6 +26,21 @@ function AppContent() {
 
     // Initialize notification service
     NotificationService.initialize();
+
+    // Pre-load App Open ad
+    loadAppOpenAd().catch(() => { });
+  }, []);
+
+  // App Open Ad — show when user returns from background
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {
+      if (appState.current.match(/inactive|background/) && nextState === 'active') {
+        showAppOpenAd().catch(() => { });
+      }
+      appState.current = nextState;
+    });
+
+    return () => subscription.remove();
   }, []);
 
   const handleAccept = () => {
