@@ -12,7 +12,8 @@
         "cancel": "Cancelar",
         "save": "Salvar",
         "logout": "Sair",
-        "signin": "Entrar com Google",
+        "delete_account": "Excluir conta",
+        "signin": "Entrar com o Google",
         "signin_failed": "Falha ao entrar",
         "try_again": "Por favor, tente novamente",
         "maybe_later": "Mais tarde",
@@ -46,7 +47,10 @@
         "version": "Versão",
         "app": "App",
         "guest": "Jogador Convidado",
-        "signout_confirm": "Tem certeza que deseja sair?"
+        "signout_confirm": "Tem certeza que deseja sair?",
+        "delete_confirm_title": "Excluir conta?",
+        "delete_confirm_msg": "Tem certeza? Isso excluirá permanentemente sua pontuação, classificação e todos os dados. Esta ação não pode ser desfeita.",
+        "delete_error": "Não foi possível excluir a conta. Tente fazer login novamente primeiro."
     },
     "quiz": {
         "level": "Nível",

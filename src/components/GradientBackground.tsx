@@ -10,7 +10,7 @@ interface Props {
     style?: any;
 }
 
-export default function GradientBackground({ children, style }: Props) {
+function GradientBackground({ children, style }: Props) {
     const { colors } = useTheme();
 
     return (
@@ -23,6 +23,8 @@ export default function GradientBackground({ children, style }: Props) {
         </LinearGradient>
     );
 }
+
+export default React.memo(GradientBackground);
 
 const styles = StyleSheet.create({
     container: {

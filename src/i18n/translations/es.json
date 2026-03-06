@@ -12,6 +12,7 @@
         "cancel": "Cancelar",
         "save": "Guardar",
         "logout": "Cerrar Sesión",
+        "delete_account": "Eliminar cuenta",
         "signin": "Iniciar sesión con Google",
         "signin_failed": "Error al iniciar sesión",
         "try_again": "Inténtalo de nuevo",
@@ -46,7 +47,10 @@
         "version": "Versión",
         "app": "App",
         "guest": "Jugador Invitado",
-        "signout_confirm": "¿Estás seguro de que quieres cerrar sesión?"
+        "signout_confirm": "¿Estás seguro de que quieres cerrar sesión?",
+        "delete_confirm_title": "¿Eliminar cuenta?",
+        "delete_confirm_msg": "¿Estás seguro? Esto eliminará permanentemente tu puntuación, rango y todos los datos. Esta acción no se puede deshacer.",
+        "delete_error": "No se pudo eliminar la cuenta. Intenta iniciar sesión de nuevo primero."
     },
     "quiz": {
         "level": "Nivel",

@@ -11,7 +11,7 @@ interface Props {
     size?: number;
 }
 
-export default function ProfileAvatar({ onPress, size = 40 }: Props) {
+function ProfileAvatar({ onPress, size = 40 }: Props) {
     const { colors } = useTheme();
     const { user, isSignedIn } = useAuth();
 
@@ -52,6 +52,8 @@ export default function ProfileAvatar({ onPress, size = 40 }: Props) {
         </TouchableOpacity>
     );
 }
+
+export default React.memo(ProfileAvatar);
 
 const styles = StyleSheet.create({
     container: {

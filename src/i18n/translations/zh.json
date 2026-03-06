@@ -12,6 +12,7 @@
         "cancel": "取消",
         "save": "保存",
         "logout": "退出登录",
+        "delete_account": "删除账户",
         "signin": "使用 Google 登录",
         "signin_failed": "登录失败",
         "try_again": "请重试",
@@ -46,7 +47,10 @@
         "version": "版本",
         "app": "应用",
         "guest": "访客玩家",
-        "signout_confirm": "您确定要退出登录吗？"
+        "signout_confirm": "您确定要退出登录吗？",
+        "delete_confirm_title": "确认删除账户？",
+        "delete_confirm_msg": "您确定吗？这将永久删除您的分数、排名和所有数据。此操作无法撤销。",
+        "delete_error": "无法删除账户名。请先尝试重新登录。"
     },
     "quiz": {
         "level": "等级",

@@ -10,7 +10,7 @@ interface Props {
     visible: boolean;
 }
 
-export default function LoadingOverlay({ visible }: Props) {
+function LoadingOverlay({ visible }: Props) {
     const { colors } = useTheme();
     const { t } = useTranslation();
     const spinAnim = useRef(new Animated.Value(0)).current;
@@ -175,6 +175,8 @@ export default function LoadingOverlay({ visible }: Props) {
         </Animated.View>
     );
 }
+
+export default React.memo(LoadingOverlay);
 
 const styles = StyleSheet.create({
     overlay: {

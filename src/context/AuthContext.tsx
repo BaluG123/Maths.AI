@@ -1,9 +1,10 @@
 // Auth Context — Google Sign-In with Firebase Auth
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import NotificationService from '../services/NotificationService';
+import { deleteUserData } from '../services/firebaseService';
 
 interface AuthContextType {
     user: FirebaseAuthTypes.User | null;
@@ -11,6 +12,7 @@ interface AuthContextType {
     isLoading: boolean;
     signInWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
+    deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -19,6 +21,7 @@ const AuthContext = createContext<AuthContextType>({
     isLoading: true,
     signInWithGoogle: async () => { },
     signOut: async () => { },
+    deleteAccount: async () => { },
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -59,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return unsubscribe;
     }, []);
 
-    const signInWithGoogle = async () => {
+    const signInWithGoogle = useCallback(async () => {
         try {
             // Check if device supports Google Play
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
@@ -81,9 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.error('Google Sign-In Error:', error);
             throw error;
         }
-    };
+    }, []);
 
-    const signOut = async () => {
+    const signOut = useCallback(async () => {
         try {
             await auth().signOut();
             // GoogleSignin.signOut() can fail if not signed in or not initialized correctly
@@ -94,17 +97,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error('Sign-Out Error:', error);
         }
-    };
+    }, []);
+
+    const deleteAccount = useCallback(async () => {
+        try {
+            const currentUser = auth().currentUser;
+            if (currentUser) {
+                // 1. Delete Firestore ranking data
+                await deleteUserData(currentUser.uid);
+
+                // 2. Delete the Firebase Auth account
+                await currentUser.delete();
+
+                // 3. Significance of signing out from Google as well
+                await GoogleSignin.signOut();
+            }
+        } catch (error: any) {
+            console.error('Delete Account Error:', error);
+            if (error.code === 'auth/requires-recent-login') {
+                throw new Error('Please sign in again to delete your account.');
+            }
+            throw error;
+        }
+    }, []);
+
+    const value = useMemo(() => ({
+        user,
+        isSignedIn: !!user,
+        isLoading,
+        signInWithGoogle,
+        signOut,
+        deleteAccount,
+    }), [user, isLoading, signInWithGoogle, signOut, deleteAccount]);
 
     return (
-        <AuthContext.Provider
-            value={{
-                user,
-                isSignedIn: !!user,
-                isLoading,
-                signInWithGoogle,
-                signOut,
-            }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

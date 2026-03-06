@@ -32,7 +32,7 @@ import NotificationService from '../services/NotificationService';
 export default function SettingsScreen({ navigation }: any) {
     const { t, i18n } = useTranslation();
     const { colors, isDark, toggleTheme } = useTheme();
-    const { user, isSignedIn, signInWithGoogle, signOut } = useAuth();
+    const { user, isSignedIn, signInWithGoogle, signOut, deleteAccount } = useAuth();
     const { soundEnabled, toggleSound } = useSound();
     const [notificationsEnabled, setNotificationsEnabledState] = useState(true);
     const [score, setScore] = useState(0);
@@ -101,6 +101,32 @@ export default function SettingsScreen({ navigation }: any) {
                 },
             },
         ]);
+    };
+
+    const handleDeleteAccount = () => {
+        Alert.alert(
+            t('settings.delete_confirm_title'),
+            t('settings.delete_confirm_msg'),
+            [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                    text: t('common.delete_account'),
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await deleteAccount();
+                            Alert.alert(t('common.delete_account'), "Your account has been successfully deleted.");
+                            navigation.goBack();
+                        } catch (error: any) {
+                            Alert.alert(
+                                t('common.error'),
+                                t('settings.delete_error')
+                            );
+                        }
+                    },
+                },
+            ]
+        );
     };
 
     const rankInfo = getRankInfo(score);
@@ -273,14 +299,22 @@ export default function SettingsScreen({ navigation }: any) {
 
                 </View>
 
-                {/* Sign Out */}
+                {/* Sign Out & Delete */}
                 {isSignedIn && (
-                    <TouchableOpacity
-                        onPress={handleSignOut}
-                        style={[styles.signOutBtn, { borderColor: colors.wrong }]}>
-                        <Icon name="logout" size={20} color={colors.wrong} />
-                        <Text style={[styles.signOutText, { color: colors.wrong }]}>{t('common.logout')}</Text>
-                    </TouchableOpacity>
+                    <View style={styles.dangerZone}>
+                        <TouchableOpacity
+                            onPress={handleSignOut}
+                            style={[styles.signOutBtn, { borderColor: colors.wrong }]}>
+                            <Icon name="logout" size={20} color={colors.wrong} />
+                            <Text style={[styles.signOutText, { color: colors.wrong }]}>{t('common.logout')}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={handleDeleteAccount}
+                            style={[styles.deleteBtn]}>
+                            <Text style={[styles.deleteText, { color: colors.textMuted }]}>{t('common.delete_account')}</Text>
+                        </TouchableOpacity>
+                    </View>
                 )}
 
                 {/* Language Modal */}
@@ -525,6 +559,19 @@ const styles = StyleSheet.create({
     signOutText: {
         fontSize: 15,
         fontWeight: '700',
+    },
+    dangerZone: {
+        marginHorizontal: 16,
+        gap: 12,
+    },
+    deleteBtn: {
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    deleteText: {
+        fontSize: 13,
+        fontWeight: '500',
+        textDecorationLine: 'underline',
     },
     bottomSpacer: {
         height: 20,

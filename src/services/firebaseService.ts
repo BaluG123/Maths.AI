@@ -105,3 +105,14 @@ export async function getUserRank(userId: string): Promise<{ rank: number; data:
         return { rank: 0, data: null };
     }
 }
+/**
+ * Delete user data from Firestore
+ */
+export async function deleteUserData(userId: string): Promise<void> {
+    try {
+        await firestore().collection(RANKINGS_COLLECTION).doc(userId).delete();
+    } catch (error) {
+        console.error('Error deleting user data:', error);
+        throw error;
+    }
+}

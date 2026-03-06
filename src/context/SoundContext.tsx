@@ -4,7 +4,7 @@
 //   - wrong.mp3
 //   - levelup.mp3
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import Sound from 'react-native-sound';
 import { getSoundEnabled, setSoundEnabled as saveSoundEnabled } from '../utils/storageHelper';
 
@@ -34,11 +34,13 @@ export function SoundProvider({ children }: { children: ReactNode }) {
         getSoundEnabled().then(enabled => setSoundEnabled(enabled));
     }, []);
 
-    const toggleSound = () => {
-        const newVal = !soundEnabled;
-        setSoundEnabled(newVal);
-        saveSoundEnabled(newVal);
-    };
+    const toggleSound = useCallback(() => {
+        setSoundEnabled(prev => {
+            const newVal = !prev;
+            saveSoundEnabled(newVal);
+            return newVal;
+        });
+    }, []);
 
     const playSound = useCallback((fileName: string) => {
         if (!soundEnabled) return;
@@ -69,9 +71,12 @@ export function SoundProvider({ children }: { children: ReactNode }) {
         playSound('levelup.mp3');
     }, [playSound]);
 
+    const value = useMemo(() => ({
+        soundEnabled, toggleSound, playCorrectSound, playWrongSound, playLevelUpSound,
+    }), [soundEnabled, toggleSound, playCorrectSound, playWrongSound, playLevelUpSound]);
+
     return (
-        <SoundContext.Provider
-            value={{ soundEnabled, toggleSound, playCorrectSound, playWrongSound, playLevelUpSound }}>
+        <SoundContext.Provider value={value}>
             {children}
         </SoundContext.Provider>
     );

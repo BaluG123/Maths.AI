@@ -1,6 +1,6 @@
 // Theme Context — Dark/Light mode with AsyncStorage persistence
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { Colors, ThemeColors } from '../theme/colors';
 import { getThemeMode, setThemeMode as saveThemeMode } from '../utils/storageHelper';
 
@@ -23,16 +23,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         getThemeMode().then(mode => setIsDark(mode === 'dark'));
     }, []);
 
-    const toggleTheme = () => {
+    const toggleTheme = useCallback(() => {
         const newMode = isDark ? 'light' : 'dark';
         setIsDark(!isDark);
         saveThemeMode(newMode);
-    };
+    }, [isDark]);
 
-    const colors = isDark ? Colors.dark : Colors.light;
+    const colors = useMemo(() => isDark ? Colors.dark : Colors.light, [isDark]);
+
+    const value = useMemo(() => ({ isDark, colors, toggleTheme }), [isDark, colors, toggleTheme]);
 
     return (
-        <ThemeContext.Provider value={{ isDark, colors, toggleTheme }}>
+        <ThemeContext.Provider value={value}>
             {children}
         </ThemeContext.Provider>
     );

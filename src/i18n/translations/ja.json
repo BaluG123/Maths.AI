@@ -12,6 +12,7 @@
         "cancel": "キャンセル",
         "save": "保存",
         "logout": "サインアウト",
+        "delete_account": "アカウントを削除",
         "signin": "Googleでサインイン",
         "signin_failed": "サインインに失敗しました",
         "try_again": "もう一度お試しください",
@@ -46,7 +47,10 @@
         "version": "バージョン",
         "app": "アプリ",
         "guest": "ゲストプレイヤー",
-        "signout_confirm": "本当にサインアウトしますか？"
+        "signout_confirm": "本当にサインアウトしますか？",
+        "delete_confirm_title": "アカウントを削除しますか？",
+        "delete_confirm_msg": "本当によろしいですか？スコア、ランク、すべてのデータが永久に削除されます。この操作は取り消せません。",
+        "delete_error": "アカウントを削除できませんでした。最初にもう一度サインインしてください。"
     },
     "quiz": {
         "level": "レベル",

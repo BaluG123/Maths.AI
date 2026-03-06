@@ -13,7 +13,7 @@ interface Props {
     style?: any;
 }
 
-export default function AdBanner({ style }: Props) {
+function AdBanner({ style }: Props) {
     const { colors } = useTheme();
 
     return (
@@ -28,6 +28,8 @@ export default function AdBanner({ style }: Props) {
         </View>
     );
 }
+
+export default React.memo(AdBanner);
 
 const styles = StyleSheet.create({
     container: {

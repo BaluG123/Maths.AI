@@ -12,6 +12,7 @@
         "cancel": "Cancel",
         "save": "Save",
         "logout": "Sign Out",
+        "delete_account": "Delete Account",
         "signin": "Sign in with Google",
         "signin_failed": "Sign In Failed",
         "try_again": "Please try again",
@@ -46,7 +47,10 @@
         "version": "Version",
         "app": "App",
         "guest": "Guest Player",
-        "signout_confirm": "Are you sure you want to sign out?"
+        "signout_confirm": "Are you sure you want to sign out?",
+        "delete_confirm_title": "Delete Account?",
+        "delete_confirm_msg": "Are you sure? This will permanently delete your score, rank, and all data. This action cannot be undone.",
+        "delete_error": "Could not delete account. Please try signing in again first."
     },
     "quiz": {
         "level": "Level",
