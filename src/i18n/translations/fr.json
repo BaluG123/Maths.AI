@@ -47,7 +47,7 @@
         "version": "Version",
         "app": "Application",
         "guest": "Joueur Invité",
-        "signout_confirm": "Êtes-vous sûr ? Cela supprimera définitivement votre score, votre rang et toutes vos données. Cette action est irréversible.",
+        "signout_confirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
         "delete_confirm_title": "Supprimer le compte ?",
         "delete_confirm_msg": "Êtes-vous sûr ? Cela supprimera définitivement votre score, votre rang et toutes vos données. Cette action est irréversible.",
         "delete_error": "Impossible de supprimer le compte. Veuillez d'abord essayer de vous reconnecter."
